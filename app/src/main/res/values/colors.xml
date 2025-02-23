@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+<!--    <color name="teal_200">#FF03DAC5</color>-->
+<!--    <color name="teal_700">#FF018786</color>-->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+<!--    <color name="teal_100">#ffb2dfdb</color>-->
+<!--    <color name="teal_200">#ff80cbc4</color>-->
+<!--    <color name="teal_400">#ff26a69a</color>-->
+<!--    <color name="teal_700">#ff00796b</color>-->
+
+<!--    <color name="teal_A100">#FFa7ffeb</color>-->
+<!--    <color name="teal_A200">#FF64ffda</color>-->
+<!--    <color name="teal_A400">#FF1de9b6</color>-->
+<!--    <color name="teal_A700">#FF00bfa5</color>-->
+
+    <color name="orange_white">#FFfffdfa</color>
+    <color name="orange_50">#FFfff3e0</color>
+    <color name="orange_100">#FFffe0b2</color>
+    <color name="orange_200">#FFffcc80</color>
+    <color name="orange_400">#FFffa726</color>
+    <color name="orange_700">#FFf57c00</color>
+
+    <color name="orange_A100">#FFffd180</color>
+    <color name="orange_A200">#FFffab40</color>
+    <color name="orange_A400">#FFff9100</color>
+    <color name="orange_A700">#FFff6d00</color>
+
+
+    <color name="grey_300">#ffe0e0e0</color>
+    <color name="grey_A100">#f5f5f5</color>
+    <color name="grey_A200">#eeeeee</color>
+    <color name="grey_A400">#bdbdbd</color>
+    <color name="grey_A700">#616161</color>
+
+</resources>
