@@ -25,7 +25,7 @@ fun MainView(){
 
 //    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope: CoroutineScope = rememberCoroutineScope() //cause opening and closing drawer is a suspend function
-    val viewModel: MainViewModel = viewModel()
+    val mainViewModel: MainViewModel = viewModel()
 
     // Allow us to find out on which view we currently are
     val controller: NavController = rememberNavController()
@@ -33,7 +33,7 @@ fun MainView(){
     val currentRoute = navBackStackEntry?.destination?.route
 
 
-    val currentScreen by viewModel.currentScreen.collectAsState()
+    val currentScreen by mainViewModel.currentScreen.collectAsState()
 
     val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
 
@@ -68,13 +68,14 @@ fun MainView(){
         },
         topBar = {
             AppBarView(
+                currentScreen = currentScreen,
                 title = title,
             )
         },
         floatingActionButton = floatingButton
 
         ){
-        Navigation(navController = controller, viewModel = viewModel, pd = it)
+        Navigation(navController = controller, mainViewModel = mainViewModel, pd = it)
     }
 }
 

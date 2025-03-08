@@ -25,89 +25,95 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.temp.R
+import com.example.temp.presentation.navigation.Screen
+import com.example.temp.presentation.navigation.screensWithBottom
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBarView(
     title:String,
-    onBackNavClicked:()->Unit={})
+    onBackNavClicked:()->Unit={},
+    currentScreen: Screen)
 {
-    var showDropDownMenu by remember { mutableStateOf(false) }
+    if(currentScreen in screensWithBottom){
+        var showDropDownMenu by remember { mutableStateOf(false) }
 
-    //so as to control visibility based on diff situations BACK OR DRAWER
-    val navigationIcon: (@Composable () -> Unit) =
-        if(!title.contains(stringResource(id = R.string.app_title))) {
-            {
+        //so as to control visibility based on diff situations BACK OR DRAWER
+        val navigationIcon: (@Composable () -> Unit) =
+            if(!title.contains(stringResource(id = R.string.app_title))) {
+                {
 
-                IconButton(onClick = { onBackNavClicked() }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        //TODO:color explicit here, change to be theme friendly
+                    IconButton(onClick = { onBackNavClicked() }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            //TODO:color explicit here, change to be theme friendly
 //                        tint = Color.Black,
-                        contentDescription = null
-                    )
-                }
+                            contentDescription = null
+                        )
+                    }
 
+                }
             }
-        }
-        else {
-            {
+            else {
+                {
+                    IconButton(
+                        onClick = {
+                            //Open the drawer - its a suspend function remember
+                            //TODO: side drawer
+                        }) {
+                        Icon(imageVector = Icons.Default.AccountCircle, contentDescription = "Menu")
+                    }
+                }
+            }
+
+
+        TopAppBar(
+            title= {
+                Text(
+                    text = title,
+                    // TODO:color explicit here, change to be theme friendly
+//                color = colorResource(id = R.color.black),
+                    fontSize = 20.sp,
+                    modifier = Modifier.heightIn(max = 30.dp)
+                )
+            },
+            actions = {
                 IconButton(
                     onClick = {
-                        //Open the drawer - its a suspend function remember
-                        //TODO: side drawer
-                    }) {
-                    Icon(imageVector = Icons.Default.AccountCircle, contentDescription = "Menu")
-                }
-            }
-        }
-
-
-    TopAppBar(
-        title= {
-            Text(
-                text = title,
-                // TODO:color explicit here, change to be theme friendly
-//                color = colorResource(id = R.color.black),
-                fontSize = 20.sp,
-                modifier = Modifier.heightIn(max = 30.dp)
-            )
-        },
-        actions = {
-            IconButton(
-                onClick = {
                         showDropDownMenu = true
-                }
-            ) {
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription =null )
-            }
-
-            MaterialTheme (shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(8.dp))){
-                DropdownMenu(
-                    expanded = showDropDownMenu,
-                    onDismissRequest = { showDropDownMenu=false }
+                    }
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(text = "Drop down item") },
-                        onClick = { /*TODO*/ }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(text = "Drop down item") },
-                        onClick = { /*TODO*/ }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(text = "Drop down item") },
-                        onClick = { /*TODO*/ }
-                    )
+                    Icon(imageVector = Icons.Default.MoreVert, contentDescription =null )
                 }
-            }
+
+                MaterialTheme (shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(8.dp))){
+                    DropdownMenu(
+                        expanded = showDropDownMenu,
+                        onDismissRequest = { showDropDownMenu=false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Drop down item") },
+                            onClick = { /*TODO*/ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Drop down item") },
+                            onClick = { /*TODO*/ }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Drop down item") },
+                            onClick = { /*TODO*/ }
+                        )
+                    }
+                }
 
 
-        },
-        navigationIcon = navigationIcon
+            },
+            navigationIcon = navigationIcon
 
-    )
+        )
+    }
+
 
 }
 
@@ -115,5 +121,5 @@ fun AppBarView(
 @Preview
 @Composable
 fun AppBarViewPreview(){
-    AppBarView(title = "Voice")
+    AppBarView(title = "Voice", currentScreen = Screen.BottomScreen.Stories)
 }

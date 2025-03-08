@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.temp.presentation.navigation.Screen
-import com.example.temp.presentation.navigation.screensInBottom
+import com.example.temp.presentation.navigation.screensWithBottom
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,9 +26,9 @@ fun BottomBarView(
 ){
 //    val currentScreen by viewModel.currentScreen.collectAsState()
 
-    if(currentScreen in screensInBottom){
+    if(currentScreen in screensWithBottom){
         NavigationBar {
-            screensInBottom.forEach{
+            screensWithBottom.forEach{
                 item->
                 val isSelected = currentRoute == item.bottomRoute
 //                val tint = if(isSelected) Color.White else Color.Black

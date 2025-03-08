@@ -63,13 +63,17 @@ sealed class Screen(val title: String, val route: String){
 //        object AddAccount: DrawerScreen()
 //    }
 
-    object StoriesDetail : Screen("User", "stories_detail/{postId}"){
-        fun createRoute(postId: Long) = "stories_detail/$postId"
+    object StoriesDetail : Screen("User", "stories_detail/{userId}"){
+        fun createRoute(userId: Long) = "stories_detail/$userId"
     }
+
+//    object StoriesDetailPage : Screen("Story", "stories_detail/{storyId}"){
+//        fun createRoute(storyId: Long) = "stories_detail/$storyId"
+//    }
 
 }
 
-val screensInBottom = listOf(
+val screensWithBottom = listOf(
     Screen.BottomScreen.Stories,
     Screen.BottomScreen.Chats,
     Screen.BottomScreen.Notifications,

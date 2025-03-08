@@ -19,55 +19,66 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.temp.MainViewModel
-import com.example.temp.data.DummyPosts
-import com.example.temp.data.Posts
+import com.example.temp.R
+import com.example.temp.StoriesViewModel
+import com.example.temp.data.StoryList
 import com.example.temp.presentation.navigation.Screen
 
 @Composable
-fun StoriesList(navController: NavHostController, viewModel: MainViewModel) {
+fun StoriesList(navController: NavHostController, mianViewModel: MainViewModel, storiesViewModel : StoriesViewModel) {
+    val usersList = storiesViewModel.usersList.collectAsState(initial = listOf())
+//    val usersList = storiesViewModel.getStoryListUsers
     LazyColumn(modifier = Modifier
         .fillMaxSize()
-        .padding(top = 16.dp)){
-        items(DummyPosts.postslist){
-                post->
-            PostItem(post = post) {
-                navController.navigate(Screen.StoriesDetail.createRoute(post.postId))
-            }
+        .padding()){
+        items(usersList.value){
+            user->
+//            storiesViewModel.getStoriesOfUser(user.userId)
+//            var currentStory = storiesViewModel.getCurrentStory()
+//            if (currentStory == null) {
+//                Box {}
+//            } else
+//            {
+                StoryItem(user = user) {
+                    navController.navigate(Screen.StoriesDetail.createRoute(user.userId))
+                }
+//            }
         }
     }
+
 }
 
 
 @Composable
-fun PostItem(post: Posts, onClick:()->Unit){
+fun StoryItem(user: StoryList, onClick:()->Unit){
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
             .clip(RoundedCornerShape(24.dp))
             .clickable {
                 onClick()
             }
             .border(
-                if (post.userName == "user1") {
-                    2.dp
-                } else {
-                    (-1).dp
-                },
+                width = 2.dp,
+                shape = RoundedCornerShape(24.dp),
+                color = if (!user.hasUnviewedStory)
+                    colorResource(id = R.color.orange_A200)
+                else
+                    colorResource(id = R.color.grey_A400)
 
-                color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(24.dp)
             ),
 
 //        colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -83,10 +94,10 @@ fun PostItem(post: Posts, onClick:()->Unit){
             ) {
 
                 //Display user Profile Image
-                if (post.userImageThumb != null) {
+                if (user.userImageThumb != null) {
                     // Load profile image from URL or local resource
                     Image(
-                        painter = rememberAsyncImagePainter(post.userImageThumb), // Use Coil/Glide if loading from URL
+                        painter = rememberAsyncImagePainter(user.userImageThumb), // Use Coil/Glide if loading from URL
                         contentDescription = "Profile Image",
                         modifier = Modifier
                             .size(40.dp)
@@ -106,7 +117,7 @@ fun PostItem(post: Posts, onClick:()->Unit){
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 //username
-                Text(text = post.userName, fontSize = 18.sp)
+                Text(text = user.userName, fontSize = 18.sp)
                 Spacer(modifier = Modifier.weight(1f))
                 //TODO:color explicit here, change to be theme friendly
                 Text(text = "Just Now", fontSize = 12.sp) //color = colorResource(id = R.color.grey_A700))
@@ -115,4 +126,3 @@ fun PostItem(post: Posts, onClick:()->Unit){
         }
     }
 }
-

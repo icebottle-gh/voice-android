@@ -19,8 +19,5 @@ class MainViewModel : ViewModel() {
         _currentScreen.value = allScreens.find {
             it.route == route
         }?: Screen.BottomScreen.Stories
-//        if (_currentScreen.value != newScreen) { // ✅ Only update if needed
-//            _currentScreen.value = newScreen
-//        }
     }
 }
