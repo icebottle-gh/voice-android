@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt") //
+    id("kotlin-parcelize")
 }
 
 android {
@@ -51,6 +52,8 @@ android {
 }
 
 dependencies {
+    //shimmer effect
+    implementation ("com.google.accompanist:accompanist-placeholder-material3:0.33.2-alpha")
 
     implementation("androidx.room:room-runtime-android:2.7.0-alpha12")//
     implementation("androidx.room:room-ktx:2.6.1")
