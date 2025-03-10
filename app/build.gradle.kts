@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
     id("kotlin-kapt") //
     id("kotlin-parcelize")
 }
@@ -41,9 +43,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -52,13 +51,18 @@ android {
 }
 
 dependencies {
+    implementation("net.folivo:trixnity-client:4.13.2")
+    implementation("net.folivo:trixnity-client-media-okio:4.13.2")
+    implementation("net.folivo:trixnity-client-repository-room:4.13.2")
+    implementation("io.ktor:ktor-client-okhttp:3.1.1")
+
     //shimmer effect
     implementation ("com.google.accompanist:accompanist-placeholder-material3:0.33.2-alpha")
 
-    implementation("androidx.room:room-runtime-android:2.7.0-alpha12")//
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-runtime-android:2.7.0-rc01")//
+    implementation("androidx.room:room-ktx:2.7.0-rc01")
 //    implementation("androidx.compose.material3:material3-android:1.3.1")//
-    kapt("androidx.room:room-compiler:2.6.1")//
+    ksp("androidx.room:room-compiler:2.7.0-rc01")//
 
     implementation("androidx.navigation:navigation-compose:2.8.5")//
     implementation("androidx.compose.ui:ui-android:1.7.6")
