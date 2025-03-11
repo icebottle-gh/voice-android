@@ -44,50 +44,86 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.temp.R
 import com.example.temp.StoriesViewModel
+import com.example.temp.data.Stories
+
 //import com.google.accompanist.placeholder.material3.placeholder
 
 @Composable
 fun StoriesDetail(userId: Long, storiesViewModel: StoriesViewModel, navController: NavHostController) {
 
-//    storiesViewModel.setCurrentUser(userId)
-//    storiesViewModel.divideUserList()
-
     storiesViewModel.startStorySession(userId)
+    storiesViewModel.mapUserStories()
+
+    //users list userid, userName,..
     val storySessionUserList by storiesViewModel.storySessionUsers.collectAsState()
+    //map userid -> list of stories
+    val usersStoriesMap by storiesViewModel.userStoriesMap.collectAsState()
 
-    val currentUserStories by storiesViewModel.currentUserStories.collectAsState()
-    val currentStory by storiesViewModel.initialStoryState.collectAsState()
-
-    //list of users
     val outerPagerState = rememberPagerState(
-        initialPage = storySessionUserList.indexOfFirst { it.userId == userId },
+        initialPage = storySessionUserList.indexOfFirst { it.userId == userId }.coerceAtLeast(0),
         pageCount = { storySessionUserList.size }
     )
     
-    HorizontalPager(state = outerPagerState){
+    HorizontalPager(
+        state = outerPagerState,
+        beyondViewportPageCount = 1
+    ){
         userIndex ->
-//        //single user's story list
-//        val innerPagerState = rememberPagerState(
-//            initialPage = currentUserStories.indexOfFirst { it.storyId == currentStory.story.storyId }.coerceAtLeast(0),
-//            pageCount = { currentUserStories.size }
-//        )
-//        HorizontalPager(state = innerPagerState) {
-//            storyIndex ->
-//            DetailScaffold(currentStory,storiesViewModel,navController)
-//
-//        }
+        var user = storySessionUserList[userIndex]
+        //storylist
+        var storiesList = usersStoriesMap[user.userId]?: emptyList()
+
+        StoryPager(
+            storiesViewModel,
+            navController,
+            storiesList
+        )
 
     }
 
 }
 
 @Composable
-fun DetailScaffold(currentStory:StoriesViewModel.StoryState, storiesViewModel: StoriesViewModel,navController:NavHostController){
+fun StoryPager(
+    storiesViewModel: StoriesViewModel,
+    navController: NavHostController,
+    stories: List<Stories>
+){
+
+    val storyPagerState = rememberPagerState(
+        initialPage = stories.indexOfFirst {
+            story->
+            !story.viewed
+        }.coerceAtLeast(0),
+        pageCount = { stories.size }
+    )
+
+    HorizontalPager(
+        state = storyPagerState,
+        modifier = Modifier.fillMaxSize(),
+        beyondViewportPageCount = 3
+    ) {
+        storyIndex->
+        val currentStory = storiesViewModel.getStoryState(stories[storyIndex])
+        DetailScaffold(currentStory,storiesViewModel,navController, storyPagerState.pageCount, storyIndex)
+    }
+
+
+}
+
+
+@Composable
+fun DetailScaffold(
+    currentStory: StoriesViewModel.StoryState,
+    storiesViewModel: StoriesViewModel,
+    navController: NavHostController,
+    storyCount: Int,
+    storyIndex: Int
+){
     Scaffold(
-        topBar = { StoriesTopBar(currentStory.story.userName) },
+        topBar = { StoriesTopBar(currentStory.story.userName, storyCount, storyIndex) },
         bottomBar = { StoryDetailBottomBar() }
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -124,13 +160,13 @@ fun DetailScaffold(currentStory:StoriesViewModel.StoryState, storiesViewModel: S
 }
 
 @Composable
-fun StoriesTopBar(name:String){
+fun StoriesTopBar(name: String, storyCount: Int, storyIndex: Int){
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 2.dp)
     ){
-        StoriesProgressIndicator()
+        StoriesProgressIndicator(storyCount, storyIndex)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -156,16 +192,16 @@ fun StoriesTopBar(name:String){
     }
 }
 @Composable
-fun StoriesProgressIndicator(){
-    val totalStories = 5
-    val currentStoryIndex = 3
+fun StoriesProgressIndicator(storyCount: Int, storyIndex: Int) {
+//    val totalStories = 5
+//    val currentStoryIndex = 3
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ){
-        repeat(totalStories){
+        repeat(storyCount){
             index->
             Box(
                 modifier = Modifier
@@ -174,7 +210,7 @@ fun StoriesProgressIndicator(){
                     .clip(RoundedCornerShape(50))
                     .background(
 //                        Color.Black
-                        if (index <= currentStoryIndex)
+                        if (index <= storyIndex)
                             Color.Black
                         else
                             Color.Gray.copy(alpha = 0.5f)

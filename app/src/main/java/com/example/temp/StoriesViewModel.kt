@@ -26,6 +26,10 @@ class StoriesViewModel(
     private val _storySessionUsers = MutableStateFlow<List<StoryList>>(emptyList())
     val storySessionUsers: StateFlow<List<StoryList>> = _storySessionUsers
 
+    //Map userid -> stories list. Flow?
+    private val _userStoriesMap = MutableStateFlow<MutableMap<Long,List<Stories>>>(mutableMapOf())
+    val userStoriesMap: StateFlow<MutableMap<Long,List<Stories>>> = _userStoriesMap
+
     private val _currentUser : MutableStateFlow<Long> = MutableStateFlow(0)
     //    private val _currentUserIndex= MutableStateFlow(0)
 
@@ -45,39 +49,53 @@ class StoriesViewModel(
     //sample data
 //    val dummyStories = DummyStories.storieslist
     init {
+
+        // user list flow
         viewModelScope.launch {
-            //get the users list
 //            getStoryListUsers = storiesRepository.getStoryListUsers()
             storiesRepository.getStoryListUsers().collect{
                 _usersList.value = it
             }
         }
 
-        viewModelScope.launch {
-
-            //get all stories of current user
-            _currentUser.collectLatest { userId ->
-                storiesRepository.getStoriesOfUser(userId).collect{ stories ->
-                    _currentUserStories.value =  stories
-                    _currentStoryIndex.value = getCurrentStoryIndex()
-
-//                    _currentUserIndex.value = _getStoryListUsers.value.indexOfFirst {
-//                        it.userId == _currentUser.value
+//        viewModelScope.launch {
+//            _usersList.collectLatest {
+//                userList->
+//                for (user in userList){
+//                    var userId = user.userId
+//                    storiesRepository.getStoriesOfUser(user.userId).collect{
+//                        stories->
+//                        _userStoriesMap.value[userId] = stories
 //                    }
-                }
-            }
+//                }
+//            }
+//        }
 
-        }
-
-        viewModelScope.launch{
-            //get current story to view for a user
-            //initial story - storystate of a user
-            _currentUserStories.collectLatest {
-                    stories->
-                val story = if (stories.isNotEmpty()) stories[getCurrentStoryIndex()] else Stories(userName = "", storyDetails = "NIL")
-                _initialStoryState.value = StoryState(loading = false, story = story)
-            }
-        }
+//        viewModelScope.launch {
+//
+//            //get all stories of current user
+//            _currentUser.collectLatest { userId ->
+//                storiesRepository.getStoriesOfUser(userId).collect{ stories ->
+//                    _currentUserStories.value =  stories
+//                    _currentStoryIndex.value = getCurrentStoryIndex()
+//
+////                    _currentUserIndex.value = _getStoryListUsers.value.indexOfFirst {
+////                        it.userId == _currentUser.value
+////                    }
+//                }
+//            }
+//
+//        }
+//
+//        viewModelScope.launch{
+//            //get current story to view for a user
+//            //initial story - storystate of a user
+//            _currentUserStories.collectLatest {
+//                    stories->
+//                val story = if (stories.isNotEmpty()) stories[getCurrentStoryIndex()] else Stories(userName = "", storyDetails = "NIL")
+//                _initialStoryState.value = StoryState(loading = false, story = story)
+//            }
+//        }
 
 //        //        Adding sample data
 //        viewModelScope.launch {
@@ -100,19 +118,63 @@ class StoriesViewModel(
 //            }
 //        }
 //    }
-//    fun setCurrentUser(userId: Long){
-//        _currentUser.value = userId
-//    }
+
+    fun mapUserStories(){
+        viewModelScope.launch {
+            _usersList.value.forEach{
+                user->
+                launch {
+                    var userId = user.userId
+                    storiesRepository.getStoriesOfUser(userId).collect{
+                        stories->
+                        _userStoriesMap.value = _userStoriesMap.value.toMutableMap().apply {
+                            put(userId, stories)
+                        }
+                    }
+                }
+            }
+            println(userStoriesMap.value)
+        }
+    }
+
+
+
+    fun setCurrentUser(userId: Long){
+        _currentUser.value = userId
+    }
     fun getCurrentStoryIndex(): Int {
         return _currentUserStories.value.indexOfFirst {story ->
             !story.viewed
         }.coerceAtLeast(0)
     }
+    fun getInitialStory(){
+
+    }
     fun startStorySession(userId: Long) {
         _storySessionUsers.value = usersList.value
-        _currentUser.value = userId
+//        _currentUser.value = userId
     }
 
+    //temporary function
+    fun getCurrentStory(userId: Long):StoryState{
+        viewModelScope.launch {
+            _currentUser.value = userId
+            storiesRepository.getStoriesOfUser(userId).collectLatest {
+                _currentUserStories.value=it
+            }
+            _currentUserStories.collectLatest {
+                    stories->
+                val story = if (stories.isNotEmpty()) stories[getCurrentStoryIndex()] else Stories(userName = "", storyDetails = "NIL")
+                _initialStoryState.value = StoryState(loading = false, story = story)
+            }
+        }
+
+        return _initialStoryState.value
+    }
+
+    fun getStoryState(story:Stories):StoryState{
+        return StoryState(loading = false, story = story)
+    }
 
 
 //    fun updateCurrentStory(){
