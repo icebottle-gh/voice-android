@@ -11,13 +11,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.temp.MainViewModel
-import com.example.temp.StoriesViewModel
 import com.example.temp.presentation.ui.StoriesDetail
 import com.example.temp.presentation.ui.StoriesList
+import com.example.temp.presentation.viewmodel.MainViewModel
+import com.example.temp.presentation.viewmodel.StoriesViewModel
 
 @Composable
-fun Navigation(
+fun HomeNavGraph(
     navController: NavController,
     mainViewModel: MainViewModel,
     pd: PaddingValues,
@@ -25,18 +25,22 @@ fun Navigation(
 ){
     NavHost(
         navController = navController as NavHostController,
+//        startDestination = Screen.Login.route,
         startDestination = Screen.BottomScreen.Stories.bottomRoute,
         modifier = Modifier.padding(pd)
     ){
+//        composable(Screen.Login.route){
+//            LoginView(navController = navController)
+//        }
         composable(Screen.BottomScreen.Stories.bottomRoute){
             mainViewModel.setCurrentScreen(Screen.BottomScreen.Stories.bottomRoute)
             StoriesList(navController,mainViewModel,storiesViewModel)
         }
-        composable(Screen.BottomScreen.Chats.bottomRoute){
-//            ChatsInbox()
-            mainViewModel.setCurrentScreen(Screen.BottomScreen.Chats.bottomRoute)
-            run {  }
-        }
+//        composable(Screen.BottomScreen.Chats.bottomRoute){
+////            ChatsInbox()
+//            mainViewModel.setCurrentScreen(Screen.BottomScreen.Chats.bottomRoute)
+//            run {  }
+//        }
         composable(Screen.BottomScreen.Notifications.bottomRoute){
 //            Notification()
             mainViewModel.setCurrentScreen(Screen.BottomScreen.Notifications.bottomRoute)
@@ -49,9 +53,9 @@ fun Navigation(
         }
         composable(
             Screen.StoriesDetail.route,
-            arguments = listOf(navArgument("userId") { type = NavType.LongType })
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ){
-            val userId = it.arguments?.getLong("userId")?:0L
+            val userId = it.arguments?.getString("userId")?:""
             mainViewModel.setCurrentScreen(Screen.StoriesDetail.route)
             StoriesDetail(userId,storiesViewModel, navController)
         }

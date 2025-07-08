@@ -3,18 +3,26 @@ package com.example.temp.data
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 
-@Entity(tableName = "stories-table")
+@Entity(
+    tableName = "stories-table",
+    foreignKeys = [
+        ForeignKey(
+            entity = Users::class,
+            parentColumns = arrayOf("userName"),
+            childColumns = arrayOf("userName"),
+            onUpdate = ForeignKey.CASCADE,
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 @Parcelize
 data class Stories(
     @PrimaryKey(autoGenerate = true)
     val storyId:Long=0,
-    @ColumnInfo
-    val userId: Long = 0L,
-    @ColumnInfo
-    val userImageThumb: String? = null,
     @ColumnInfo
     val userName: String,
     @ColumnInfo
@@ -26,12 +34,21 @@ data class Stories(
 ):Parcelable
 
 //for stories list page
-data class StoryList(
-    val userId: Long,
+data class User(
     val userName: String,
-    val userImageThumb: String? = null,
+    val displayName: String,
     val hasUnviewedStory: Boolean = true
 )
+
+data class Story(
+    val userName: String,
+    val displayName: String,
+    val storyId: Long,
+    val storyDetails: String,
+    val timePosted: Long,
+    val viewed: Boolean
+)
+
 
 //@Entity(tableName = "users-stories-table")
 //@Parcelize

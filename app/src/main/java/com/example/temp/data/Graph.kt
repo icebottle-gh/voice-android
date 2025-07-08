@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 
 object Graph {
-    lateinit var database: StoriesDatabase
+    lateinit var database: VakkiDatabase
 
     val storiesRepository by lazy {
         StoriesRepository(storiesDao = database.StoriesDao())
@@ -12,8 +12,8 @@ object Graph {
     fun provide(context:Context){
         database = Room.databaseBuilder(
                 context,
-                StoriesDatabase::class.java,
-                "stories.db"
+                VakkiDatabase::class.java,
+                "vakki.db"
             ).build()
     }
 }

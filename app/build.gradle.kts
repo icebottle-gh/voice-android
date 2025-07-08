@@ -65,6 +65,7 @@ dependencies {
 //    implementation("androidx.compose.material:material-android:1.7.6")//
     implementation("androidx.compose.ui:ui-tooling-preview-android:1.7.6")//
 
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
 
     implementation("io.coil-kt:coil-compose:2.4.0")//Image loading
 
@@ -76,6 +77,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation(files("libs/vakkic-UNVERSIONED-DEV.jar"))
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.13.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
@@ -83,4 +88,5 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
 }

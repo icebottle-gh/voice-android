@@ -1,4 +1,4 @@
-package com.example.temp
+package com.example.temp.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.example.temp.presentation.navigation.Screen

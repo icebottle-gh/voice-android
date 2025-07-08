@@ -10,6 +10,8 @@ import com.example.temp.R
 
 sealed class Screen(val title: String, val route: String){
 
+    object Login: Screen("Login","login_route")
+
     sealed class BottomScreen(
         val bottomTitle: String,
         val bottomRoute: String,
@@ -25,14 +27,14 @@ sealed class Screen(val title: String, val route: String){
             true
         )
 
-        object Chats: BottomScreen(
-            "Chats",
-            "chats_route",
-            R.drawable.baseline_chat_bubble_outline_24,
-            R.drawable.baseline_chat_bubble_24,
-            true,
-            56
-        )
+//        object Chats: BottomScreen(
+//            "Chats",
+//            "chats_route",
+//            R.drawable.baseline_chat_bubble_outline_24,
+//            R.drawable.baseline_chat_bubble_24,
+//            true,
+//            56
+//        )
 
         object Notifications: BottomScreen(
             "Notifications",
@@ -64,7 +66,7 @@ sealed class Screen(val title: String, val route: String){
 //    }
 
     object StoriesDetail : Screen("User", "stories_detail/{userId}"){
-        fun createRoute(userId: Long) = "stories_detail/$userId"
+        fun createRoute(userId: String) = "stories_detail/$userId"
     }
 
 //    object StoriesDetailPage : Screen("Story", "stories_detail/{storyId}"){
@@ -74,16 +76,17 @@ sealed class Screen(val title: String, val route: String){
 }
 
 val screensWithBottom = listOf(
-    Screen.BottomScreen.Stories,
-    Screen.BottomScreen.Chats,
+//    Screen.BottomScreen.Chats,
     Screen.BottomScreen.Notifications,
+    Screen.BottomScreen.Stories,
     Screen.BottomScreen.Find
 )
 
 val allScreens = listOf(
 
+    Screen.Login,
     Screen.BottomScreen.Stories,
-    Screen.BottomScreen.Chats,
+//    Screen.BottomScreen.Chats,
     Screen.BottomScreen.Notifications,
     Screen.BottomScreen.Find,
 

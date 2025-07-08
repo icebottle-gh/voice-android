@@ -18,32 +18,36 @@ abstract class StoriesDao {
 //    abstract fun getAllStories():Flow<List<Stories>>
 
     //USERS LIST FOR STORY LIST PAGE
+    //userName, displayName, timePosted, viewed
     // also orderd by viewed or not - if user has even one unviewed
     // ordered by timeposted asc of their last story
     @Query("""
-                SELECT userId, userName, userImageThumb,
+                SELECT STORIES.userName, displayName,
                     MAX(timePosted) AS latestStoryTime,
-                    MIN(viewed) AS hasUnviewedStory
-                FROM `STORIES-TABLE`
-                GROUP BY userId, userName, userImageThumb
-                ORDER BY hasUnviewedStory ASC, latestStoryTime DESC
+                    MIN(viewed)=0 AS hasUnviewedStory
+                FROM `STORIES-TABLE` AS STORIES 
+                JOIN `USERS-TABLE` AS USERS 
+                ON STORIES.userName=USERS.userName 
+                GROUP BY STORIES.userName,displayName
+                ORDER BY hasUnviewedStory DESC, latestStoryTime DESC
     """)
-    abstract fun getStoryListUsers(): Flow<List<StoryList>>
+    abstract fun getStoryListUsers(): Flow<List<User>>
 
     //STORY LIST OF A SINGLE USER
+    //userName, displayName, storyId, storyDetails, timePosted, viewed
     @Query("""
-        SELECT userId,userName,userImageThumb, storyId,storyDetails, timePosted, viewed
-        FROM `stories-table`
-        WHERE userId==:userId
+        SELECT stories.userName, users.displayName, stories.storyId,stories.storyDetails, stories.timePosted, stories.viewed
+        FROM `stories-table` as stories 
+        JOIN `users-table` as users 
+        ON stories.userName=users.userName
+        WHERE stories.userName==:user
         ORDER BY timePosted ASC
     """)
-    abstract fun getStoriesofUser(userId: Long): Flow<List<Stories>>
+    abstract fun getStoriesofUser(user: String): List<Story>
 
-    //FIRST UNVIEWED STORY OF A USER
-
-
-
-    //Update New story users (viewed = false) which users have new stories
+    //UPDATE VIEW STATUS
+    @Query("UPDATE `stories-table` SET viewed = 1 WHERE storyId = :storyId")
+    abstract fun markStoryAsViewed(storyId: Long)
 
     //delete the stories posted 24h ago
 

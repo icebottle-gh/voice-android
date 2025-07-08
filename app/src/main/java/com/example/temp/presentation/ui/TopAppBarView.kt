@@ -1,6 +1,9 @@
 package com.example.temp.presentation.ui
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -29,7 +32,7 @@ import com.example.temp.presentation.navigation.Screen
 import com.example.temp.presentation.navigation.screensWithBottom
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppBarView(
     title:String,
@@ -69,6 +72,8 @@ fun AppBarView(
 
 
         TopAppBar(
+            windowInsets = WindowInsets.statusBarsIgnoringVisibility,
+//            modifier = Modifier.safeContentPadding(),
             title= {
                 Text(
                     text = title,

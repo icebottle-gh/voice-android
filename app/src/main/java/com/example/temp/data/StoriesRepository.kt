@@ -8,8 +8,11 @@ class StoriesRepository(private val storiesDao: StoriesDao) {
     suspend fun addNewStory(story: Stories){
         storiesDao.addNewStory(story)
     }
-    fun getStoryListUsers(): Flow<List<StoryList>> = storiesDao.getStoryListUsers()
-    fun getStoriesOfUser(userId:Long): Flow<List<Stories>> = storiesDao.getStoriesofUser(userId)
+    fun getStoryListUsers(): Flow<List<User>> = storiesDao.getStoryListUsers()
+    fun getStoriesOfUser(user:String): List<Story> = storiesDao.getStoriesofUser(user)
 
+    fun markStoryAsViewed( storyId: Long){
+        storiesDao.markStoryAsViewed( storyId = storyId)
+    }
 
 }
