@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,10 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.temp.R
 import com.example.temp.presentation.viewmodel.LoginViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginView(onLoginSuccess: () -> Unit, viewModel: LoginViewModel) {
-
+    val scope = rememberCoroutineScope()
     val otp by viewModel.otp
     var phone by remember { mutableStateOf("") }
 //    var otp by remember { mutableStateOf("") }
@@ -66,9 +68,11 @@ fun LoginView(onLoginSuccess: () -> Unit, viewModel: LoginViewModel) {
             Spacer(modifier = Modifier.height(15.dp))
             Button(
                 onClick = {
-//                    println("Button clicked" )
-                    viewModel.requestOtp(phone)
-                    otpSent = true
+                    scope.launch {
+                        viewModel.requestOtp(phone) {
+                            otpSent = true
+                        }
+                    }
                 },
                 shape = RoundedCornerShape(10.dp)
             ) {
@@ -104,16 +108,7 @@ fun LoginView(onLoginSuccess: () -> Unit, viewModel: LoginViewModel) {
             Button(
                 onClick = {
                     if (otp.length >= otpDigits){
-                        onLoginSuccess()
-//                        navController.navigate(Screen.BottomScreen.Stories.bottomRoute){
-//                            // This pops up to the start destination of the graph to
-//                            // avoid building up a large stack of destinations
-//                            // on the back stack as users select items
-//                            popUpTo(navController.graph.startDestinationId) {
-//                                inclusive = true
-//                            }
-//                        }
-
+                        viewModel.login(phone, otp) { onLoginSuccess() }
                     }
                 },
                 shape = RoundedCornerShape(10.dp)
@@ -132,8 +127,8 @@ fun LoginView(onLoginSuccess: () -> Unit, viewModel: LoginViewModel) {
 
 }
 
-@Preview
-@Composable
-fun LoginPreview(){
-    LoginView({}, viewModel = LoginViewModel())
-}
+//@Preview
+//@Composable
+//fun LoginPreview(){
+//    LoginView({}, viewModel = LoginViewModel())
+//}

@@ -23,7 +23,6 @@ fun AppNavGraph(
         composable("login") {
             LoginView (
                 onLoginSuccess = {
-                    viewModel.setLoggedIn(true)
                     navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }

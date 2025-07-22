@@ -6,5 +6,5 @@ import org.noormahal.ib.vakkic.User
 
 object Client {
     var app: App = AppImpl("https://ib-service.noormahal.org/ib-api/vakki", "9ciBrYwZePyjgDnutVoaDci9LGiHy6uJKV")
-    lateinit var user: User
+    var user: User? = null
 }
