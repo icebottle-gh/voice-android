@@ -11,8 +11,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.temp.presentation.ui.FindScreen
+import com.example.temp.presentation.ui.ProfileScreen
 import com.example.temp.presentation.ui.StoriesDetail
 import com.example.temp.presentation.ui.StoriesList
+import com.example.temp.presentation.viewmodel.FindScreenViewModel
 import com.example.temp.presentation.viewmodel.MainViewModel
 import com.example.temp.presentation.viewmodel.StoriesViewModel
 
@@ -21,7 +24,8 @@ fun HomeNavGraph(
     navController: NavController,
     mainViewModel: MainViewModel,
     pd: PaddingValues,
-    storiesViewModel: StoriesViewModel = viewModel()
+    storiesViewModel: StoriesViewModel = viewModel(),
+    findScreenViewModel: FindScreenViewModel = viewModel()
 ){
     NavHost(
         navController = navController as NavHostController,
@@ -49,7 +53,7 @@ fun HomeNavGraph(
         composable(Screen.BottomScreen.Find.bottomRoute){
 //            FindPeople()
             mainViewModel.setCurrentScreen(Screen.BottomScreen.Find.bottomRoute)
-            run {  }
+            FindScreen(navController, findScreenViewModel)
         }
         composable(
             Screen.StoriesDetail.route,
@@ -58,6 +62,19 @@ fun HomeNavGraph(
             val userId = it.arguments?.getString("userId")?:""
             mainViewModel.setCurrentScreen(Screen.StoriesDetail.route)
             StoriesDetail(userId,storiesViewModel, navController)
+        }
+
+        composable(
+            route = "profile/{userId}",
+            arguments = listOf(navArgument("userId") {
+                type = NavType.StringType
+            })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            ProfileScreen(
+                navController = navController,
+                userId = userId
+            )
         }
     }
 }
