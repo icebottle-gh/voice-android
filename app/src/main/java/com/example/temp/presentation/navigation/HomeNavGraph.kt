@@ -11,8 +11,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.temp.components.PersonProfileLongBioPreview
 import com.example.temp.presentation.ui.FindScreen
-import com.example.temp.presentation.ui.ProfileScreen
 import com.example.temp.presentation.ui.StoriesDetail
 import com.example.temp.presentation.ui.StoriesList
 import com.example.temp.presentation.viewmodel.FindScreenViewModel
@@ -71,10 +71,7 @@ fun HomeNavGraph(
             })
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
-            ProfileScreen(
-                navController = navController,
-                userId = userId
-            )
+            PersonProfileLongBioPreview()
         }
     }
 }
