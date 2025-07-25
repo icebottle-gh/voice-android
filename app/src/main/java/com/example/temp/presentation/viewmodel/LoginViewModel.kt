@@ -1,21 +1,15 @@
 package com.example.temp.presentation.viewmodel
 
-import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.temp.common.Client
-import com.example.temp.data.AppSecretDao
-import com.example.temp.data.VakkiDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.noormahal.ib.vakkic.ApiException
-import org.noormahal.ib.vakkic.AppImpl
-import org.noormahal.ib.vakkic.UserImpl
 
 class LoginViewModel(application: Application): AndroidViewModel(application) {
     private val _isLoggedIn = MutableStateFlow(false) // Replace with actual login check

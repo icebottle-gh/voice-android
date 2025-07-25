@@ -48,7 +48,7 @@ fun StoriesList(navController: NavHostController, mainViewModel: MainViewModel, 
 //    val usersList = storiesViewModel.usersList.collectAsState(initial = listOf())
 
     val usersList = MutableStateFlow(listOf(
-        User("saji", "Sajidha Abdulla", true),
+        User("Saji", "Sajidha Abdulla", true),
         User("sali", "Muhammed Salih", true),
         User("hahi", "Hahahahahha", true),
         User("kiki", "Kiki Kuku", false),

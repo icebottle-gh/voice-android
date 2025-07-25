@@ -55,6 +55,12 @@ dependencies {
     //shimmer effect
     implementation ("com.google.accompanist:accompanist-placeholder-material3:0.33.2-alpha")
 
+    //date
+//    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+
     implementation("androidx.room:room-runtime-android:2.7.0-alpha12")//
     implementation("androidx.room:room-ktx:2.6.1")
 //    implementation("androidx.compose.material3:material3-android:1.3.1")//
@@ -64,6 +70,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-android:1.7.6")
 //    implementation("androidx.compose.material:material-android:1.7.6")//
     implementation("androidx.compose.ui:ui-tooling-preview-android:1.7.6")//
+
+    //country-code
+//    implementation("com.github.arpitkatiyar1999:Country-Picker:<latest-version>")
 
     implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
 

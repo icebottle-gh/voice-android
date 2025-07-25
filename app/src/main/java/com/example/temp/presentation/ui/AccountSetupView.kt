@@ -1,25 +1,30 @@
 package com.example.temp.presentation.ui
 
 import android.app.DatePickerDialog
-import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
-import androidx.compose.foundation.clickable
+import android.widget.DatePicker
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,49 +32,61 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountSetupView(){
+fun AccountSetupView(onSubmit: () -> Unit) {
     val spacerHeight = 20.dp
+
+    var fullName by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
 
     val genderOptions = listOf("Male", "Female", "Other")
     var expanded by remember { mutableStateOf(false) }
-    var selectedOptionText by remember { mutableStateOf(genderOptions[0]) } // Initial selection
+    var selectedGender by remember { mutableStateOf("") } // Initial selection
+
 
     val context = LocalContext.current
-    val dateFormatter = remember {
-        SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val calendar = remember { Calendar.getInstance() }
+    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())}
+
+    var dob by remember { mutableStateOf("") }
+
+    val showDatePicker = {
+        DatePickerDialog(
+            context,
+            { _: DatePicker, year: Int, month: Int, day: Int ->
+                calendar.set(year, month, day)
+                dob = dateFormat.format(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).apply {
+            datePicker.maxDate = System.currentTimeMillis()
+        }.show()
     }
-    var dobText by remember { mutableStateOf("") }
-    // Used to open the DatePickerDialog
-    val calendar = Calendar.getInstance()
-//    val datePickerDialog = DatePickerDialog(
-//            context,
-//            { _, year, month, dayOfMonth ->
-//                calendar.set(year, month, dayOfMonth)
-//                dobText = dateFormatter.format(calendar.time)
-//            },
-//            calendar.get(Calendar.YEAR),
-//            calendar.get(Calendar.MONTH),
-//            calendar.get(Calendar.DAY_OF_MONTH)
-//        ).apply {
-//            datePicker.maxDate = System.currentTimeMillis() // Optional: prevent future dates
-//        }
 
-
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .systemBarsPadding()
+            .padding(20.dp)
+            .imePadding()
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -82,7 +99,7 @@ fun AccountSetupView(){
         Spacer(modifier = Modifier.height(40.dp))
 
         //MOBILE
-        TextField(
+        OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = "",
             enabled = false,
@@ -94,11 +111,11 @@ fun AccountSetupView(){
         Spacer(modifier = Modifier.height(spacerHeight))
 
         //FULL NAME
-        TextField(
+        OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = "",
+            value = fullName,
             enabled = true,
-            onValueChange = {},
+            onValueChange = {fullName = it},
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             label = { Text(text = "Full Name") }
@@ -106,25 +123,24 @@ fun AccountSetupView(){
         Spacer(modifier = Modifier.height(spacerHeight))
 
         //DOB
-        TextField(
-            modifier = Modifier.fillMaxWidth()
-                .clickable {
-                    println("clicked dob")
-                    val datePickerDialog = DatePickerDialog(
-                        context,
-                        { _, year, month, dayOfMonth ->
-                            calendar.set(year, month, dayOfMonth)
-                            dobText = dateFormatter.format(calendar.time)
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                    ).apply {
-                        datePicker.maxDate = System.currentTimeMillis()
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    println("in pointer input")
+                    awaitEachGesture {
+                        // Modifier.clickable doesn't work for text fields, so we use Modifier.pointerInput
+                        // in the Initial pass to observe events before the text field consumes them
+                        // in the Main pass.
+                        awaitFirstDown(pass = PointerEventPass.Initial)
+                        val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        if (upEvent != null) {
+                            showDatePicker()
+                        }
                     }
-                    datePickerDialog.show()
+
                 },
-            value = dobText,
+            value = dob,
             enabled = true,
             onValueChange = {},
             singleLine = true,
@@ -139,9 +155,11 @@ fun AccountSetupView(){
             onExpandedChange = { expanded = !expanded },
             modifier = Modifier.fillMaxWidth()
         ) {
-            TextField(
-                modifier = Modifier.fillMaxWidth().menuAnchor(),
-                value = selectedOptionText,
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+                value = selectedGender,
                 onValueChange = { }, // Read-only for dropdown
                 readOnly = true,
                 label = { Text("Gender") },
@@ -150,7 +168,7 @@ fun AccountSetupView(){
                         expanded = expanded
                     )
                 },
-                colors = ExposedDropdownMenuDefaults.textFieldColors()
+//                colors = ExposedDropdownMenuDefaults.textFieldColors()
             )
 
             ExposedDropdownMenu(
@@ -161,7 +179,7 @@ fun AccountSetupView(){
                     DropdownMenuItem(
                         text = { Text(text = selectionOption) },
                         onClick = {
-                            selectedOptionText = selectionOption
+                            selectedGender = selectionOption
                             expanded = false
                         }
                     )
@@ -170,36 +188,36 @@ fun AccountSetupView(){
         }
         Spacer(modifier = Modifier.height(spacerHeight))
 
-        //EMAIL
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = "",
-            enabled = true,
-            onValueChange = {},
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            label = { Text(text = "Email") }
-        )
-        Spacer(modifier = Modifier.height(spacerHeight))
-
-        //ALTERNATE MOBILE
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = "",
-            enabled = true,
-            onValueChange = {},
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            label = { Text(text = "Alternate Mobile") }
-        )
-        Spacer(modifier = Modifier.height(spacerHeight))
+//        //EMAIL
+//        TextField(
+//            modifier = Modifier.fillMaxWidth(),
+//            value = "",
+//            enabled = true,
+//            onValueChange = {},
+//            singleLine = true,
+//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+//            label = { Text(text = "Email") }
+//        )
+//        Spacer(modifier = Modifier.height(spacerHeight))
+//
+//        //ALTERNATE MOBILE
+//        TextField(
+//            modifier = Modifier.fillMaxWidth(),
+//            value = "",
+//            enabled = true,
+//            onValueChange = {},
+//            singleLine = true,
+//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+//            label = { Text(text = "Alternate Mobile") }
+//        )
+//        Spacer(modifier = Modifier.height(spacerHeight))
 
         //BIO
-        TextField(
+        OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = "",
+            value = bio,
             enabled = true,
-            onValueChange = {},
+            onValueChange = {bio=it},
             minLines = 3,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             label = { Text(text = "Bio") }
@@ -209,7 +227,8 @@ fun AccountSetupView(){
 
         Button(
             onClick = {
-                      //TODO
+                      //TODO Go to Home Screen, if info is valid.
+                      onSubmit()
             },
             shape = RoundedCornerShape(10.dp)
         ) {
@@ -219,9 +238,10 @@ fun AccountSetupView(){
 
 }
 
-
 @Composable
 @Preview
 fun AccountSetupPreview(){
-    AccountSetupView()
+    AccountSetupView {
+
+    }
 }
