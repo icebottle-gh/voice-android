@@ -1,22 +1,25 @@
 package com.example.temp.presentation.viewmodel
 
+import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.temp.common.Client
+import com.example.temp.data.AppSecretDao
+import com.example.temp.data.VakkiDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.noormahal.ib.vakkic.ApiException
+import org.noormahal.ib.vakkic.AppImpl
+import org.noormahal.ib.vakkic.UserImpl
 
 class LoginViewModel(application: Application): AndroidViewModel(application) {
     private val _isLoggedIn = MutableStateFlow(false) // Replace with actual login check
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
     private val _isLoadingSession = MutableStateFlow(true)
     val isLoadingSession: StateFlow<Boolean> = _isLoadingSession
-
     private val appSecretDao: AppSecretDao = VakkiDatabase.getDatabase(application).appSecretDao()
 
     private val _otp = mutableStateOf("")
@@ -32,14 +35,13 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
         wake()
     }
 
-    fun requestOtp(mobile: String, onSuccess: () -> Unit) {
+    fun requestOtp(mobile: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 println("calling api")
                 Client.app.requestLoginOtp(mobile)
                 _otp.value = Client.app.peekOtp(mobile)
                 println(_otp.value)
-                onSuccess()
             } catch (e: Exception) {
                 // handle error
                 println(e)

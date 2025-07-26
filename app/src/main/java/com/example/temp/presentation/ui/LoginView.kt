@@ -5,68 +5,69 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.temp.components.LoginOtp
-import com.example.temp.components.LoginPhoneEmail
+import com.example.temp.components.Login
 import com.example.temp.presentation.viewmodel.LoginViewModel
-import kotlinx.coroutines.launch
 
 
 @Composable
 fun LoginView(onLoginSuccess: () -> Unit, loginViewModel: LoginViewModel = viewModel()) {
     val scope = rememberCoroutineScope()
     val otp by loginViewModel.otp
-    var phone by remember { mutableStateOf("") }
+    var mobile by remember {
+        mutableStateOf("")
+    }
     var email by remember {
         mutableStateOf("")
     }
-    var otpSent by remember { mutableStateOf(false) } //controls flow
+    var otpSent by remember {
+        mutableStateOf(false)
+    }
+    var phoneCountryCode by remember {
+        mutableStateOf("")
+    }
 
-    if (!otpSent){
-        LoginPhoneEmail(
-            loginInfo = LoginInfo(
-                phone,
-                email,
-                otp
-            ),
-            onPhoneChange = { /*TODO*/ },
-            onEmailChange = { /*TODO*/ }
-        ) {
-            scope.launch {
-                loginViewModel.requestOtp(phone) {
-                    otpSent = true
-                }
-            }
-        }
-    }else{
-        LoginOtp(
-            loginInfo = LoginInfo(
-                phone,
-                email,
-                otp
-            ),
-            onOtpChange = { /*TODO*/ },
-            onChangeNumber = { /*TODO*/ },
-            onResendOTP = { /*TODO*/ },
-            onChangeEmail = { /*TODO*/ }
-        ) {
-            loginViewModel.login(phone, otp) { onLoginSuccess() }
-        }
+
+    Login(
+        otpSent = otpSent,
+        isEmail = true,
+        loginInfo = LoginInfo(
+            phoneCountryCode,
+            mobile,
+            email,
+            otp
+        ),
+        onCountryCodeChange = {phoneCountryCode = it},
+        onPhoneChange = { mobile = it },
+        onEmailChange= { email = it },
+        onSendOTP= {
+            loginViewModel.requestOtp(mobile=mobile)
+            otpSent=true
+        },
+        onOtpChange= {
+            // TODO typing otp
+        },
+        onChangeNumber= {
+            otpSent = false
+        },
+        onChangeEmail= {
+            otpSent = false
+        },
+        onResendOTP= {
+             loginViewModel.requestOtp(phoneCountryCode+mobile)
+        },
+    ) {
+        //OnSubmit
+        onLoginSuccess()
     }
 
 
 }
 
 data class LoginInfo(
+    val phoneCountryCode:String,
     val phone:String,
     val email:String,
     val otp:String,
 )
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview(){
-    LoginView({}, loginViewModel = LoginViewModel())
-}

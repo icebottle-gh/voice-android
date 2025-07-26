@@ -10,13 +10,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.temp.presentation.navigation.AppNavGraph
 import com.example.temp.presentation.viewmodel.LoginViewModel
 import com.example.temp.ui.theme.TempTheme
 
 class MainActivity : ComponentActivity() {
-    val loginViewModel by viewModels<LoginViewModel>()
+    val loginViewModel: LoginViewModel by viewModels<LoginViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)

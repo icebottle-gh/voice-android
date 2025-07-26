@@ -54,7 +54,7 @@ fun AppNavGraph(
         composable("login") {
             LoginView (
                 onLoginSuccess = {
-//                    loginviewModel.setLoggedIn(true)
+                    loginviewModel.setLoggedIn(true)
                     navController.navigate("account_setup") {
                         popUpTo("login") { inclusive = true }
                     }
