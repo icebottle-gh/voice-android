@@ -52,6 +52,9 @@ android {
 }
 
 dependencies {
+//    val composeBom = platform("androidx.compose:compose-bom:2025.05.00")
+//    implementation(composeBom)
+
     //shimmer effect
     implementation ("com.google.accompanist:accompanist-placeholder-material3:0.33.2-alpha")
 
@@ -73,8 +76,10 @@ dependencies {
 
     //country-code
 //    implementation("com.github.arpitkatiyar1999:Country-Picker:<latest-version>")
+    implementation("network.chaintech:cmp-country-code-picker:1.0.1")
 
-    implementation("androidx.compose.material3:material3-window-size-class:1.3.2")
+
+    implementation("androidx.compose.material3:material3-window-size-class")
 
     implementation("io.coil-kt:coil-compose:2.4.0")//Image loading
 
@@ -95,6 +100,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+//    androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
