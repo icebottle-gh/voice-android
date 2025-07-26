@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.util.query
 import com.example.temp.common.Client
+import com.example.temp.components.PersonListItemProps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,17 +16,20 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.noormahal.ib.vakkic.dto.PersonalizedProfile
+import java.util.stream.Collectors
 
 @OptIn(kotlinx.coroutines.FlowPreview::class)
 class FindScreenViewModel(application: Application): AndroidViewModel(application) {
     private val _typing = MutableStateFlow(false)
     private val _loading = MutableStateFlow(false)
     private val _searchString = MutableStateFlow("")
-    private val _searchResults = MutableStateFlow<List<PersonalizedProfile>>(emptyList())
+    private val _searchResults = MutableStateFlow<List<PersonListItemProps>>(emptyList())
+    private val _searchInNetworkOnly = MutableStateFlow(false)
     val typing: StateFlow<Boolean> = _typing
     val loading: StateFlow<Boolean> = _loading
     val searchString: StateFlow<String> = _searchString
-    val searchResults: StateFlow<List<PersonalizedProfile>> = _searchResults
+    val searchResults: StateFlow<List<PersonListItemProps>> = _searchResults
+    val searchInNetworkOnly: StateFlow<Boolean> = _searchInNetworkOnly
 
     /**
      * Listen to searchString, and typing. Update loading flag and searchResult.
@@ -42,8 +46,13 @@ class FindScreenViewModel(application: Application): AndroidViewModel(applicatio
                     }
                 }
                 .collectLatest { query ->
-
-                    _searchResults.value = Client.user!!.people().search(query, _typing.value)
+                    val result = if (typing.value) {
+                        Client.user!!.people().searchSuggest(query, _searchInNetworkOnly.value)
+                    } else {
+                        Client.user!!.people().search(query, _searchInNetworkOnly.value, 0)
+                    }
+                    _searchResults.value = result
+                        .stream().map { makePersonListItemProps(it) }.collect(Collectors.toList())
                     _loading.value = false
                 }
         }
@@ -52,9 +61,25 @@ class FindScreenViewModel(application: Application): AndroidViewModel(applicatio
             _typing.collectLatest { typing ->
                 if (!typing) {
                     _loading.value = true
-                    _searchResults.value = Client.user!!.people().search(_searchString.value, _typing.value)
+                    val result = Client.user!!.people().search(_searchString.value, _searchInNetworkOnly.value, 0)
+                    _searchResults.value = result
+                        .stream().map { makePersonListItemProps(it) }.collect(Collectors.toList())
                     _loading.value = false
                 }
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            _searchInNetworkOnly.collectLatest { isNetworkOnly ->
+                _loading.value = true
+                val result = if (_typing.value) {
+                    Client.user!!.people().searchSuggest(_searchString.value, isNetworkOnly)
+                } else {
+                    Client.user!!.people().search(_searchString.value, isNetworkOnly, 0)
+                }
+                _searchResults.value = result.stream().map { makePersonListItemProps(it) }
+                    .collect(Collectors.toList())
+                _loading.value = false
             }
         }
     }
@@ -65,5 +90,19 @@ class FindScreenViewModel(application: Application): AndroidViewModel(applicatio
 
     fun setSearchString(query: String) {
         _searchString.value = query
+    }
+
+    fun setSearchInNetworkOnly(value: Boolean) {
+        _searchInNetworkOnly.value = value
+    }
+
+    fun makePersonListItemProps(profile: PersonalizedProfile): PersonListItemProps {
+        return PersonListItemProps(
+            id = profile.id,
+            fullName = profile.fullName,
+            nickName = profile.nickName,
+            isFollowing = true,
+            isFollower = true
+        )
     }
 }

@@ -36,7 +36,7 @@ fun PersonListItem(props: PersonListItemProps, onFollowClick: () -> Unit = {}) {
                 .padding(end = 8.dp) // Add some space between text and button
         ) {
             Text(
-                text = displayName,
+                text = displayName ?: "No name provided!",
                 style = MaterialTheme.typography.titleMedium, // Or titleSmall, bodyLarge
                 fontWeight = FontWeight.Bold // Make full name stand out
             )
@@ -109,7 +109,7 @@ fun PersonListItemFollowPreview() {
 
 data class PersonListItemProps(
     val id: String,
-    val fullName: String,
+    val fullName: String?,
     val nickName: String?,
     val isFollowing: Boolean,
     val isFollower: Boolean

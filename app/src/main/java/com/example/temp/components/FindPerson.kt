@@ -1,5 +1,6 @@
 package com.example.temp.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +35,10 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FindPerson(
-    props: FindPersonProps,
+    searchString: String,
+    isConnection: Boolean,
+    searchResult: List<PersonListItemProps>,
+    isLoading: Boolean,
     onSubmit: () -> Unit,
     onSearchStringChange: (String) -> Unit,
     onToggleConnection: (Boolean) -> Unit,
@@ -42,51 +46,53 @@ fun FindPerson(
     onUnfollow: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    Scaffold() { contentPadding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically // Align items vertically
-            ) {
-                OutlinedTextField(
-                    value = props.searchString,
-                    onValueChange = { onSearchStringChange(it) },
-                    label = { Text("Search") },
-                    modifier = Modifier.weight(1f), // TextField takes available space
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Search // Show search icon on keyboard
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            onSubmit()
-                            keyboardController?.hide() // Hide keyboard on search action
-                        }
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp)) // Space between TextField and Button
-                IconButton(
-                    onClick = {
+    Column(modifier = Modifier
+        .padding(16.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            OutlinedTextField(
+                value = searchString,
+                onValueChange = { onSearchStringChange(it) },
+                label = { Text("Search") },
+                modifier = Modifier.weight(1f), // TextField takes available space
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search // Show search icon on keyboard
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
                         onSubmit()
-                        keyboardController?.hide() // Hide keyboard on button click
-                    },
-                    enabled = !props.isLoading // Enable button if not loading and query is not blank
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = "Search"
-                    )
-                }
+                        keyboardController?.hide() // Hide keyboard on search action
+                    }
+                )
+            )
+            Spacer(modifier = Modifier.width(8.dp)) // Space between TextField and Button
+            IconButton(
+                onClick = {
+                    onSubmit()
+                    keyboardController?.hide() // Hide keyboard on button click
+                },
+                enabled = !isLoading // Enable button if not loading and query is not blank
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = "Search"
+                )
             }
+        }
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             SecondaryTabRow(
-                modifier = Modifier.padding(contentPadding),
-                selectedTabIndex = if (props.isConnection) 1 else 0
+                modifier = Modifier.padding(),
+                selectedTabIndex = if (isConnection) 1 else 0
             ) {
                 Tab(
-                    selected = !props.isConnection,
+                    selected = !isConnection,
                     onClick = { onToggleConnection(false) },
                     text = {
                         Text(
@@ -96,7 +102,7 @@ fun FindPerson(
                 )
 
                 Tab(
-                    selected = props.isConnection,
+                    selected = isConnection,
                     onClick = { onToggleConnection(true) },
                     text = {
                         Text(
@@ -105,13 +111,13 @@ fun FindPerson(
                     }
                 )
             }
-
-            PersonList(
-                props = PersonListProps(list = props.searchResult, isLoading = props.isLoading),
-                onFollow = onFollow,
-                onUnfollow = onUnfollow
-            )
         }
+
+        PersonList(
+            props = PersonListProps(list = searchResult, isLoading = isLoading),
+            onFollow = onFollow,
+            onUnfollow = onUnfollow
+        )
     }
 }
 
@@ -125,38 +131,29 @@ data class FindPersonProps(
 @Preview(showBackground = true)
 @Composable
 fun FindPersonPreview() {
-    val props = FindPersonProps(
-        searchString = "John",
-        isConnection = true,
-        searchResult = listOf(
-            PersonListItemProps(
-                id = "1",
-                fullName = "John Doe",
-                nickName = "Johnny",
-                isFollowing = true,
-                isFollower = true
-            ),
-            PersonListItemProps(
-                id = "2",
-                fullName = "Jane Smith",
-                nickName = null,
-                isFollowing = false,
-                isFollower = false
-            )
+    val searchResult = listOf(
+        PersonListItemProps(
+            id = "1",
+            fullName = "John Doe",
+            nickName = "Johnny",
+            isFollowing = true,
+            isFollower = true
         ),
-        isLoading = false
+        PersonListItemProps(
+            id = "2",
+            fullName = "Jane Smith",
+            nickName = null,
+            isFollowing = false,
+            isFollower = false
+        )
     )
-    FindPerson(props, {}, {}, {}, {}, {})
+    FindPerson(searchString = "John", isConnection = true,
+        searchResult = searchResult, isLoading = false, {}, {}, {}, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 fun FindPersonLoadingPreview() {
-    val props = FindPersonProps(
-        searchString = "John",
-        isConnection = false,
-        searchResult = emptyList(),
-        isLoading = true
-    )
-    FindPerson(props, {}, {}, {}, {}, {})
+    FindPerson(searchString = "John", isConnection = false,
+        searchResult = emptyList(), isLoading = true, {}, {}, {}, {}, {})
 }

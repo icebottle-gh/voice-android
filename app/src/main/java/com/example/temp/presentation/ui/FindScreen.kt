@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import com.example.temp.components.FindPerson
 import com.example.temp.presentation.viewmodel.FindScreenViewModel
 import org.noormahal.ib.vakkic.dto.PersonalizedProfile
 
@@ -38,91 +39,21 @@ fun FindScreen(navController: NavController, viewModel: FindScreenViewModel) {
     val searchQuery by viewModel.searchString.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
     val isLoading by viewModel.loading.collectAsState()
+    val searchInNetworkOnly by viewModel.searchInNetworkOnly.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically // Align items vertically
-        ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { viewModel.setSearchString(it) },
-                label = { Text("Search") },
-                modifier = Modifier.weight(1f), // TextField takes available space
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Search // Show search icon on keyboard
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        viewModel.submitSearch()
-                        keyboardController?.hide() // Hide keyboard on search action
-                    }
-                )
-            )
-            Spacer(modifier = Modifier.width(8.dp)) // Space between TextField and Button
-            IconButton(
-                onClick = {
-                    viewModel.submitSearch()
-                    keyboardController?.hide() // Hide keyboard on button click
-                },
-                enabled = !isLoading && searchQuery.isNotBlank() // Enable button if not loading and query is not blank
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search"
-                )
-            }
-        }
-//        TextField(
-//            value = searchQuery,
-//            onValueChange = { viewModel.setSearchString(it) },
-//            label = { Text("Search") },
-//            modifier = Modifier.fillMaxWidth()
-//        )
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // .weight(1f) // Optional: if you want it to take remaining space when list is empty
-                    .padding(vertical = 16.dp), // Add padding around the indicator
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp) // Example size
-                )
-            }
-        } else {
-            UserList(users = searchResults, onUserClick = { userId -> navController.navigate("profile/$userId") })
-        }
-    }
-}
-
-@Composable
-fun UserList(users: List<PersonalizedProfile>, onUserClick: (String) -> Unit) {
-    if (users.isEmpty()) {
-        Text("No users found.", modifier = Modifier.padding(top = 16.dp))
-        return
-    }
-    LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
-        items(users) { user ->
-            UserRow(user, onClick = { onUserClick(user.id) })
-        }
-    }
-}
-
-@Composable
-fun UserRow(user: PersonalizedProfile, onClick: () -> Unit = {}) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable(onClick = onClick)
-    ) {
-        Text(text = user.fullName)
-    }
+    FindPerson(
+        searchString = searchQuery,
+        isConnection = searchInNetworkOnly,
+        searchResult = searchResults,
+        isLoading = isLoading,
+        onSubmit = {
+            keyboardController?.hide()
+            viewModel.submitSearch()
+        },
+        onSearchStringChange = viewModel::setSearchString,
+        onToggleConnection = viewModel::setSearchInNetworkOnly,
+        onFollow = {},
+        onUnfollow = {}
+    )
 }
