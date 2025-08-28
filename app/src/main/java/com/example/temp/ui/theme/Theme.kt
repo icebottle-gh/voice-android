@@ -8,30 +8,70 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = OrangeA200,
+    onPrimary = OrangeBlack800,
+
+    secondary = Orange400,
+    onSecondary = OrangeBlack800,
+
+//    tertiary = Pink80
+//    primary = Purple80,
+//    secondary = PurpleGrey80,
+//    tertiary = Pink80
+
+    background = OrangeBlack800,
+    onBackground = Grey300,
+
+    surface =  OrangeBlack800,
+    onSurface = Grey300,
+
+    primaryContainer = OrangeA200,
+    onPrimaryContainer = White,
+    secondaryContainer = OrangeBrown,
+    onSecondaryContainer = White,
+
+    surfaceVariant = OrangeBlack700,
+    onSurfaceVariant = GreyA400,
+
+//    outline = GreyA700,          // Borders, dividers
+//    error = Orange700,
+//    onError = OrangeBlack800
 )
 
 private val LightColorScheme = lightColorScheme(
-//    primary = OrangeA200,
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
+    primary = OrangeA200,
+    secondary = GreyA700,
+    tertiary = Orange400,
 
-//    background = Color.White,
-//    surface = Color.White,
-//    surfaceVariant = OrangeLight,
+//    primary = Purple40,
+//    secondary = PurpleGrey40,
+//    tertiary = Pink40,
+
+    background = White,
+    onBackground = OrangeBlack900,
+
+    surface = White,
+    onSurface = OrangeBlack900,
+
+    surfaceVariant = Grey300,   // Outlined cards, filled text field background
+    onSurfaceVariant = GreyA700,
+
+    primaryContainer = Orange100,
+    onPrimaryContainer = OrangeBlack800,
+    secondaryContainer = Orange50,
+    onSecondaryContainer = OrangeBlack800,
+
+//    outline = GreyA400,         // Dividers, borders
+//    error = Color(0xFFB00020),
+//    onError = White
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -66,7 +106,8 @@ fun TempTheme(
             val window = (view.context as Activity).window
 //            window.statusBarColor = colorScheme.background.toArgb()
 //            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = colorScheme.surfaceColorAtElevation(4.dp).toArgb()
+            window.navigationBarColor = colorScheme.surface.toArgb()
+//            window.navigationBarColor = colorScheme.surfaceColorAtElevation(3.dp).toArgb()
            //WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             WindowCompat.getInsetsController(window,view).isAppearanceLightNavigationBars = !darkTheme
