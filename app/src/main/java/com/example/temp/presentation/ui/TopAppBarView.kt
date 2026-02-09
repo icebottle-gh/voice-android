@@ -36,6 +36,8 @@ import com.example.temp.presentation.navigation.screensWithBottom
 @Composable
 fun AppBarView(
     title:String,
+    topBarAction: String = "menu",
+    onTopBarAction: () -> Unit = {},
     onBackNavClicked:()->Unit={},
     currentScreen: Screen)
 {
@@ -44,10 +46,10 @@ fun AppBarView(
 
         //so as to control visibility based on diff situations BACK OR DRAWER
         val navigationIcon: (@Composable () -> Unit) =
-            if(!title.contains(stringResource(id = R.string.app_title))) {
+            if(topBarAction == "back") {
                 {
 
-                    IconButton(onClick = { onBackNavClicked() }) {
+                    IconButton(onClick = onTopBarAction) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             //TODO:color explicit here, change to be theme friendly
@@ -61,10 +63,8 @@ fun AppBarView(
             else {
                 {
                     IconButton(
-                        onClick = {
-                            //Open the drawer - its a suspend function remember
-                            //TODO: side drawer
-                        }) {
+                        onClick = onTopBarAction
+                    ) {
                         Icon(imageVector = Icons.Default.AccountCircle, contentDescription = "Menu")
                     }
                 }

@@ -53,6 +53,17 @@ sealed class Screen(val title: String, val route: String){
             false
         )
 
+
+        companion object {
+            val fromRoute = fun(route: String): BottomScreen {
+                return when (route) {
+                    Stories.bottomRoute -> Stories
+                    Notifications.bottomRoute -> Notifications
+                    Find.bottomRoute -> Find
+                    else -> throw IllegalArgumentException("Route $route does not match a BottomRoute.")
+                }
+            }
+        }
     }
 
 //    sealed class DrawerScreen(val dTitle: String, val dRoute: String, @DrawableRes val icon: Int)

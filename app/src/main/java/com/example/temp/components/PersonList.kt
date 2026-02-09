@@ -31,7 +31,7 @@ fun PersonList(
             )
         }
     } else {
-        LazyColumn(modifier = Modifier.padding(vertical = 8.dp)) {
+        LazyColumn(modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()) {
             items(props.list.size) { index ->
                 val personListItemProps = props.list[index]
                 val onFollowClick = {

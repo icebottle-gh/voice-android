@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun PersonListItem(props: PersonListItemProps, onFollowClick: () -> Unit = {}) {
     val displayName = if (props.nickName != null) "[ ${props.nickName} ]" else props.fullName

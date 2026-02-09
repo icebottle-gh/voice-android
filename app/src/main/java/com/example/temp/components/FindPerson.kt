@@ -43,15 +43,15 @@ fun FindPerson(
     onSearchStringChange: (String) -> Unit,
     onToggleConnection: (Boolean) -> Unit,
     onFollow: (String) -> Unit,
-    onUnfollow: (String) -> Unit
+    onUnfollow: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    Column(modifier = Modifier
-        .padding(16.dp),
+    Column(modifier = modifier,
         verticalArrangement = Arrangement.Top
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(16.dp, 0.dp),
         ) {
             OutlinedTextField(
                 value = searchString,
@@ -75,6 +75,7 @@ fun FindPerson(
                     onSubmit()
                     keyboardController?.hide() // Hide keyboard on button click
                 },
+                modifier = Modifier.align(Alignment.CenterVertically),
                 enabled = !isLoading // Enable button if not loading and query is not blank
             ) {
                 Icon(
@@ -130,7 +131,7 @@ data class FindPersonProps(
 
 @Preview(showBackground = true)
 @Composable
-fun FindPersonPreview() {
+fun FindPersonPreview(modifier: Modifier = Modifier) {
     val searchResult = listOf(
         PersonListItemProps(
             id = "1",
@@ -148,7 +149,7 @@ fun FindPersonPreview() {
         )
     )
     FindPerson(searchString = "John", isConnection = true,
-        searchResult = searchResult, isLoading = false, {}, {}, {}, {}, {})
+        searchResult = searchResult, isLoading = false, {}, {}, {}, {}, {}, modifier = modifier)
 }
 
 @Preview(showBackground = true)

@@ -26,8 +26,7 @@ fun AppNavGraph(
 
     var splashComplete by remember { mutableStateOf(false) }
 
-    val startDestination = "login"
-//    val startDestination = if (isLoggedIn) "home" else "login"
+    val startDestination = if (isLoggedIn) "home" else "login"
 
 //    LaunchedEffect(Unit) {
 //        // Auto login check

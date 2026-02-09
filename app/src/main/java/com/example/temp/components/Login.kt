@@ -230,7 +230,7 @@ fun LoginEmailPreview(){
 }
 
 @Composable
-@Preview(showBackground = true, apiLevel = 34)
+@Preview(showBackground = true, apiLevel = 35)
 fun LoginOtpPreview(){
     Login(
         otpSent=true,

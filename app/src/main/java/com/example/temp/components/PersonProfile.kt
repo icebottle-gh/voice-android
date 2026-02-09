@@ -57,10 +57,11 @@ fun PersonProfile(
     isOwnProfile: Boolean,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
-    onNickNameChange: (String?) -> Unit
+    onNickNameChange: (String?) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var showEditNicknameDialog by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         when {
             isLoading -> {
                 CircularProgressIndicator()
@@ -240,7 +241,7 @@ fun PersonProfilePreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun PersonProfileLongBioPreview() {
+fun PersonProfileLongBioPreview(modifier: Modifier = Modifier) {
     PersonProfile(
         isLoading = false,
         error = null,
@@ -254,7 +255,8 @@ fun PersonProfileLongBioPreview() {
         isOwnProfile = false,
         onFollow = {},
         onUnfollow = {},
-        onNickNameChange = {}
+        onNickNameChange = {},
+        modifier = modifier
     )
 }
 
