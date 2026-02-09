@@ -57,23 +57,40 @@ jobs:
       if: github.event_name == 'pull_request'
       id: pr_email
       run: |
+        echo "Getting email for PR author: ${{ github.event.pull_request.user.login }}"
+        
         # Get PR author's public email from GitHub API
         USER_EMAIL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           "https://api.github.com/users/${{ github.event.pull_request.user.login }}" | \
-          jq -r '.email // empty')
+          jq -r '.email // "null"' 2>/dev/null || echo "null")
+        
+        echo "Public email result: $USER_EMAIL"
         
         # If no public email, use latest commit email
-        if [ -z "$USER_EMAIL" ] || [ "$USER_EMAIL" = "null" ]; then
-          USER_EMAIL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/commits" | \
-            jq -r '.[-1].commit.author.email // empty')
+        if [ "$USER_EMAIL" = "null" ] || [ -z "$USER_EMAIL" ]; then
+          echo "No public email found, trying latest commit..."
+          
+          # Get commits and check if it's an array
+          COMMITS_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/commits")
+          
+          # Check if we got a valid response
+          if echo "$COMMITS_RESPONSE" | jq -e 'type == "array"' >/dev/null 2>&1; then
+            USER_EMAIL=$(echo "$COMMITS_RESPONSE" | jq -r '.[0].commit.author.email // "null"' 2>/dev/null || echo "null")
+            echo "Commit email result: $USER_EMAIL"
+          else
+            echo "Failed to get commits, API response: $COMMITS_RESPONSE"
+            USER_EMAIL="null"
+          fi
         fi
         
         # Fallback to configured email if still empty
-        if [ -z "$USER_EMAIL" ] || [ "$USER_EMAIL" = "null" ]; then
+        if [ "$USER_EMAIL" = "null" ] || [ -z "$USER_EMAIL" ]; then
+          echo "Using fallback email"
           USER_EMAIL="${{ secrets.EMAIL_TO }}"
         fi
         
+        echo "Final email: $USER_EMAIL"
         echo "user_email=$USER_EMAIL" >> $GITHUB_OUTPUT
 
     - name: Send APK via email (Push to branch)
