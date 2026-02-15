@@ -53,46 +53,6 @@ jobs:
         echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
         echo "apk_name=$(basename $APK_PATH)" >> $GITHUB_OUTPUT
         
-    - name: Get PR author email
-      if: github.event_name == 'pull_request'
-      id: pr_email
-      run: |
-        echo "Getting email for PR author: ${{ github.event.pull_request.user.login }}"
-        
-        # Get PR author's public email from GitHub API
-        USER_EMAIL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/users/${{ github.event.pull_request.user.login }}" | \
-          jq -r '.email // "null"' 2>/dev/null || echo "null")
-        
-        echo "Public email result: $USER_EMAIL"
-        
-        # If no public email, use latest commit email
-        if [ "$USER_EMAIL" = "null" ] || [ -z "$USER_EMAIL" ]; then
-          echo "No public email found, trying latest commit..."
-          
-          # Get commits and check if it's an array
-          COMMITS_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/commits")
-          
-          # Check if we got a valid response
-          if echo "$COMMITS_RESPONSE" | jq -e 'type == "array"' >/dev/null 2>&1; then
-            USER_EMAIL=$(echo "$COMMITS_RESPONSE" | jq -r '.[0].commit.author.email // "null"' 2>/dev/null || echo "null")
-            echo "Commit email result: $USER_EMAIL"
-          else
-            echo "Failed to get commits, API response: $COMMITS_RESPONSE"
-            USER_EMAIL="null"
-          fi
-        fi
-        
-        # Fallback to configured email if still empty
-        if [ "$USER_EMAIL" = "null" ] || [ -z "$USER_EMAIL" ]; then
-          echo "Using fallback email"
-          USER_EMAIL="${{ secrets.EMAIL_TO }}"
-        fi
-        
-        echo "Final email: $USER_EMAIL"
-        echo "user_email=$USER_EMAIL" >> $GITHUB_OUTPUT
-
     - name: Send APK via email (Push to branch)
       if: github.event_name == 'push'
       uses: dawidd6/action-send-mail@v3
@@ -127,7 +87,7 @@ jobs:
         username: ${{ secrets.SMTP_USERNAME }}
         password: ${{ secrets.SMTP_PASSWORD }}
         subject: "APK Build - PR #${{ github.event.pull_request.number }} to ${{ github.event.pull_request.base.ref }}"
-        to: ${{ steps.pr_email.outputs.user_email }}
+        to: ${{ secrets.EMAIL_TO }}
         from: ${{ secrets.EMAIL_FROM }}
         body: |
           APK build ready for your Pull Request!
@@ -145,3 +105,26 @@ jobs:
           
           PR Link: ${{ github.event.pull_request.html_url }}
         attachments: ${{ steps.apk.outputs.apk_path }}
+
+    - name: Notify build failure
+      if: failure()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        subject: "❌ Build Failed - ${{ github.event_name == 'pull_request' && format('PR #{0}', github.event.pull_request.number) || github.ref_name }}"
+        to: ${{ secrets.EMAIL_TO }}
+        from: ${{ secrets.EMAIL_FROM }}
+        body: |
+          ❌ APK build failed!
+          
+          Event: ${{ github.event_name }}
+          Repository: ${{ github.repository }}
+          ${{ github.event_name == 'pull_request' && format('Pull Request: #{0} - {1}', github.event.pull_request.number, github.event.pull_request.title) || format('Branch: {0}', github.ref_name) }}
+          Commit: ${{ github.sha }}
+          ${{ github.event_name == 'pull_request' && format('Author: {0}', github.event.pull_request.user.login) || format('Author: {0}', github.event.head_commit.author.name) }}
+          
+          Check the logs:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
