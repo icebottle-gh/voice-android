@@ -53,6 +53,13 @@ jobs:
         echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
         echo "apk_name=$(basename $APK_PATH)" >> $GITHUB_OUTPUT
         
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-${{ github.sha }}
+        path: ${{ steps.apk.outputs.apk_path }}
+        retention-days: 30
+        
     - name: Send APK via email (Push to branch)
       if: github.event_name == 'push'
       uses: dawidd6/action-send-mail@v3
@@ -73,10 +80,10 @@ jobs:
           Commit Message: ${{ github.event.head_commit.message }}
           Author: ${{ github.event.head_commit.author.name }}
           
-          APK file (${{ steps.apk.outputs.apk_name }}) is attached.
+          Download APK from GitHub Actions:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           
-          Build triggered by push to branch: ${{ github.ref_name }}
-        attachments: ${{ steps.apk.outputs.apk_path }}
+          APK file: ${{ steps.apk.outputs.apk_name }}
 
     - name: Send APK via email (Pull Request)
       if: github.event_name == 'pull_request'
@@ -101,10 +108,11 @@ jobs:
           Repository: ${{ github.repository }}
           Commit: ${{ github.event.pull_request.head.sha }}
           
-          APK file (${{ steps.apk.outputs.apk_name }}) is attached for testing.
+          Download APK from GitHub Actions:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           
+          APK file: ${{ steps.apk.outputs.apk_name }}
           PR Link: ${{ github.event.pull_request.html_url }}
-        attachments: ${{ steps.apk.outputs.apk_path }}
 
     - name: Notify build failure
       if: failure()
