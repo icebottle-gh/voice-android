@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Temp"
+rootProject.name = "VP25"
 include(":app")

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!--    <style name="Theme.Temp" parent="androidx.compose.material3.DayNightTheme">-->
-    <style name="Theme.Temp" parent="android:Theme.Material.Light.NoActionBar"/>
+<!--    <style name="Theme.VP25" parent="androidx.compose.material3.DayNightTheme">-->
+    <style name="Theme.VP25" parent="android:Theme.Material.Light.NoActionBar"/>
 
     <!--    Splash Screen-->
-    <style name="Theme.Temp.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.VP25.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/status</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/white</item>
