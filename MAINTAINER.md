@@ -93,7 +93,8 @@ https://support.google.com/accounts/answer/185833
 
 ## Maintenance Checklist
 
-* Build locally before merge
-* Verify CI passes
+* Verify CI passes for pull requests
 * Confirm artifact generation
+* Use the apk artifact for usability testing
+* Accept or respond to pull requests
 * Update docs when workflows change

@@ -11,7 +11,7 @@ Contributors may:
 * Submit a bid for a task
 * Indicate an expected payment amount (for bids on bounty tasks)
 
-* Most contributions are expected to be voluntary, but some tasks may be marked as bounty tasks:
+Most contributions are expected to be voluntary, but some tasks may be marked as bounty tasks:
 
 ### **Bounty Tasks**
 

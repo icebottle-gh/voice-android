@@ -4,6 +4,7 @@ VP25 (Voice Project 2025) is a project by icebottle™.
 **VP25** and **Voice Project 2025** are trademarks of **icebottle™**.
 
 The source code in this repository is licensed under the MIT License.  
+
 The open-source license applies only to the code and does **not** grant rights to use the project names VP25, Voice Project 2025, or the icebottle™ trademark.
 
 ## Allowed
