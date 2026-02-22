@@ -1,78 +1,67 @@
-# Voice Android
+# Voice Android — VP25
 
-An Android application for VP25.
+Voice Android is the Android client for VP25 (Voice Project 2025), a project exploring a clean social platform for broadcasting short-lived verbal messages.
+
+The application is currently in a primitive prototype stage and will evolve through experimentation.
+
+## Concept
+
+VP25 introduces **Voice Story** — short voice or text broadcasts that disappear after 24 hours, enabling lightweight and intentional sharing.
+
+The prototype focuses on simple identity, controlled audience selection, and subscription-based feeds.
+
+## Phase-1 Prototype Features
+
+* Login using mobile number and one-time password (OTP)
+* Subscribe/unsubscribe feature between users
+* Ability to send disappearing textual broadcasts to subscribers
+* Custom audience targeting among subscribers (family, colleagues, etc.)
+
+---
+
+## Technology
+
+* Kotlin
+* Jetpack Compose
+
+The architecture and supporting technologies may change as the project evolves.
 
 ## Project Structure
 
-- `app/` - Main application module
-- `.github/workflows/` - GitHub Actions CI/CD workflows
+* `app/` — Main Android application module
+* `.github/workflows/` — CI/CD automation
 
-## Development
+## Getting Started
 
-### Prerequisites
+### Requirements
 
-- JDK 17
-- Android SDK
-- Gradle (wrapper included)
+* Android Studio (latest stable)
+* JDK 17+
+* Android SDK
 
-### Building
+### Clone
+
+Clone the repo. Open in Android Studio and run on an emulator or device.
+
+### Build via CLI
 
 ```bash
-# Build debug APK
 ./gradlew assembleDebug
-
-# Build release APK
 ./gradlew assembleRelease
 ```
 
-## CI/CD
+---
 
-This project uses GitHub Actions for continuous integration and delivery.
+## Contributing
 
-### Automated Workflows
+See **CONTRIBUTING.md** for contribution guidelines and workflow.
 
-The build workflow (`.github/workflows/build-and-deliver.yml`) runs on:
-- Push to `master`, `main`, or sprint branches (`S1`, `S2`, etc.)
-- Pull requests targeting these branches
+## License
 
-### What the workflow does:
+Source code is released under the MIT License.
+See `LICENSE.md`.
 
-1. **Build** - Compiles the debug APK
-2. **Upload** - Stores APK as GitHub Artifact (30-day retention)
-3. **Notify** - Sends email notification to the team
+## Trademark
 
-### Email Notifications
-
-**On successful build:**
-- **Push to branch**: Email with build details and download link
-- **Pull request**: Email with PR info and download link
-
-**On build failure:**
-- Email with error details and link to logs
-
-All emails are sent to the configured team email (`EMAIL_TO` secret).
-
-### Downloading APKs
-
-APKs are available as GitHub Artifacts:
-1. Click the download link in the email
-2. Log into GitHub (if not already)
-3. Navigate to the workflow run
-4. Download the APK from the Artifacts section
-
-**Note:** GitHub Artifacts require repository access to download.
-
-### Required Secrets
-
-Configure these in GitHub repository settings:
-
-- `EMAIL_TO` - Recipient email address
-- `EMAIL_FROM` - Sender email address
-- `SMTP_USERNAME` - Gmail SMTP username
-- `SMTP_PASSWORD` - Gmail app password ([setup guide](https://support.google.com/accounts/answer/185833))
-
-### Workflow Configuration
-
-Sprint branch naming: `S1`, `S2`, `S3`, etc. (matches pattern `S[0-9]*`)
-
-APK retention: 30 days (configurable in workflow file)
+Project name and brand assets are not covered by the MIT license.
+See `TRADEMARK.md`.
