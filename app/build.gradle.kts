@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.temp"
+    namespace = "org.noormahal.vp25.android"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.temp"
+        applicationId = "org.noormahal.vp25.android"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
