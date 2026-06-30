@@ -13,14 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,10 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.presentation.ui.LoginInfo
-import network.chaintech.cmpcountrycodepicker.model.CountryDetails
-import network.chaintech.cmpcountrycodepicker.ui.CountryPickerBasicTextField
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Login(
     otpSent: Boolean,
@@ -63,10 +55,6 @@ fun Login(
     val otpDigits = 6
     val isOtpValid = loginInfo.otp.length == otpDigits && loginInfo.otp.all { it.isDigit() }
 
-    val selectedCountryState: MutableState<CountryDetails?> = remember {
-        mutableStateOf(null)
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -89,35 +77,19 @@ fun Login(
         Spacer(modifier = Modifier.height(10.dp))
 
         if (!isEmail){
-            //ccp and phone
-            CountryPickerBasicTextField(
+            VpMobileNumberField(
                 mobileNumber = loginInfo.phone,
-                defaultCountryCode = "in",
                 onMobileNumberChange = onPhoneChange,
-                onCountrySelected = {
-                    selectedCountryState.value = it
-                    onCountryCodeChange(it.countryCode)
-                },
-                showCountryFlag = false,
-                showCountryCode = true,
-                showCountryPhoneCode = true,
-                spaceAfterCountryCode = 4.dp,
-                spaceAfterCountryPhoneCode = 4.dp,
+                onCountrySelected = { onCountryCodeChange(it.countryCode) },
                 enabled = !otpSent,
-                label = { Text(text = "Mobile") },
-                singleLine = true
             )
         }else{
-            //email
-            OutlinedTextField(
+            VpTextField(
                 value = loginInfo.email,
-                enabled = !otpSent,
                 onValueChange = onEmailChange,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                label = { Text(text = "Email") },
-                shape = RoundedCornerShape(10.dp),
-//            isError = loginInfo.email.isNotEmpty() && !isPhoneValid
+                label = "Email",
+                keyboardType = KeyboardType.Email,
+                enabled = !otpSent,
             )
         }
 
@@ -135,18 +107,13 @@ fun Login(
 //        )
 
         if(otpSent){
-            OutlinedTextField(
+            VpTextField(
                 value = loginInfo.otp,
-                onValueChange = { otp->
-                    val filteredValue = otp.filter { it.isDigit() }
-                    if (filteredValue.length <= otpDigits)
-                        onOtpChange(otp)
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text(text = "OTP") },
-                shape = RoundedCornerShape(10.dp),
-//                isError = loginInfo.otp.isNotEmpty() && !isOtpValid
+                onValueChange = onOtpChange,
+                label = "OTP",
+                keyboardType = KeyboardType.Number,
+                digitOnly = true,
+                maxLength = otpDigits,
             )
         }
 

@@ -85,7 +85,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun TempTheme(
+fun VpTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -99,19 +99,6 @@ fun TempTheme(
 
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
-    }
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-//            window.statusBarColor = colorScheme.background.toArgb()
-//            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = colorScheme.surface.toArgb()
-//            window.navigationBarColor = colorScheme.surfaceColorAtElevation(3.dp).toArgb()
-           //WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window,view).isAppearanceLightNavigationBars = !darkTheme
-        }
     }
 
     MaterialTheme(
