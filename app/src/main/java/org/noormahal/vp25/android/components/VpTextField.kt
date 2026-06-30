@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.noormahal.vp25.android.theme.TempTheme
+import org.noormahal.vp25.android.theme.VpTheme
 
 private val TEXT_FIELD_CORNER_RADIUS = 10.dp
 
@@ -45,7 +45,7 @@ fun VpTextField(
 @Preview(showBackground = true)
 @Composable
 fun VpTextFieldEmailPreview() {
-    TempTheme {
+    VpTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -63,7 +63,7 @@ fun VpTextFieldEmailPreview() {
 @Preview(showBackground = true)
 @Composable
 fun VpTextFieldEmailDisabledPreview() {
-    TempTheme {
+    VpTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -82,7 +82,7 @@ fun VpTextFieldEmailDisabledPreview() {
 @Preview(showBackground = true)
 @Composable
 fun VpTextFieldOtpPreview() {
-    TempTheme {
+    VpTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

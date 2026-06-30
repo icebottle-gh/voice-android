@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import org.noormahal.vp25.android.presentation.navigation.AppNavGraph
 import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
-import org.noormahal.vp25.android.theme.TempTheme
+import org.noormahal.vp25.android.theme.VpTheme
 
 class MainActivity : ComponentActivity() {
     val loginViewModel: LoginViewModel by viewModels<LoginViewModel>()
@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
 //        WindowCompat.setDecorFitsSystemWindows(window,false)
         setContent {
 //            WindowInsets.statusBars
-            TempTheme {
+            VpTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

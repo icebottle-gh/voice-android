@@ -55,7 +55,8 @@ fun Login(
     val otpDigits = 6
     val isOtpValid = loginInfo.otp.length == otpDigits && loginInfo.otp.all { it.isDigit() }
 
-    Column(        modifier = Modifier
+    Column(
+        modifier = Modifier
             .fillMaxSize()
             .imePadding()
             .clickable(

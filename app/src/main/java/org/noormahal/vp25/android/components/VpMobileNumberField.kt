@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import network.chaintech.cmpcountrycodepicker.model.CountryDetails
 import network.chaintech.cmpcountrycodepicker.ui.CountryPickerBasicTextField
-import org.noormahal.vp25.android.theme.TempTheme
+import org.noormahal.vp25.android.theme.VpTheme
 
 private val COUNTRY_CODE_SPACING = 4.dp
 private const val DISABLED_ALPHA = 0.38f
@@ -54,7 +54,7 @@ fun VpMobileNumberField(
 @Preview(showBackground = true)
 @Composable
 fun VpMobileNumberFieldPreview() {
-    TempTheme {
+    VpTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -71,7 +71,7 @@ fun VpMobileNumberFieldPreview() {
 @Preview(showBackground = true)
 @Composable
 fun VpMobileNumberFieldDisabledPreview() {
-    TempTheme {
+    VpTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
