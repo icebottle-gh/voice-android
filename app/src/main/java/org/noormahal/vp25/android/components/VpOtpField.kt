@@ -26,8 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.theme.VpTheme
 
-private val OTP_BOX_SIZE = 48.dp
-private val OTP_BOX_SPACING = 8.dp
+private val OTP_BOX_SIZE = 46.dp
+private val OTP_BOX_SPACING = 2.dp
 private val OTP_BOX_CORNER_RADIUS = 8.dp
 private val OTP_BORDER_WIDTH = 1.dp
 private val OTP_FOCUSED_BORDER_WIDTH = 2.dp
@@ -51,7 +51,9 @@ fun VpOtpField(
         },
         enabled = enabled,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-        modifier = modifier.onFocusChanged { isFocused = it.isFocused },
+        modifier = modifier
+            .onFocusChanged { isFocused = it.isFocused }
+            .padding(12.dp),
         decorationBox = {
             Row(horizontalArrangement = Arrangement.spacedBy(OTP_BOX_SPACING)) {
                 repeat(length) { index ->
