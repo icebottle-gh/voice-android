@@ -20,7 +20,7 @@ fun SplashView(){
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(R.drawable.status),
+            painter = painterResource(R.drawable.app_logo),
             contentDescription = "Splash Logo"
         )
     }

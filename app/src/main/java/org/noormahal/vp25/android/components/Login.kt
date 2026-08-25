@@ -69,9 +69,9 @@ fun Login(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.status),
+            painter = painterResource(id = R.drawable.app_logo),
             contentDescription = "Logo",
-            modifier = Modifier.size(150.dp)
+            modifier = Modifier.size(190.dp)
         )
         Spacer(modifier = Modifier.height(20.dp))
 
