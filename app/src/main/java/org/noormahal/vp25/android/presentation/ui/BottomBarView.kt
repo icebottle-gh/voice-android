@@ -31,7 +31,6 @@ fun BottomBarView(
             screensWithBottom.forEach{
                 item->
                 val isSelected = currentRoute == item.bottomRoute
-//                val tint = if(isSelected) Color.White else Color.Black
                 NavigationBarItem(
                     selected = isSelected,
                     onClick = {
@@ -51,27 +50,20 @@ fun BottomBarView(
 
                         ) {
                             Icon(
-
-//                            tint=tint,
                                 painter = if (currentRoute==item.bottomRoute){
                                     painterResource(id = item.selectedIcon)
                                 }else{
                                     painterResource(id = item.unselectedIcon)
                                 },
                                 contentDescription = item.title,
-
-////                            title.value = item.bottomTitle
                             )
                         }
 
                     },
                     label = { Text(text = item.bottomTitle)}
-//                            selectedContentColor = Color.White,
-//                            unselectedContentColor = Color.Black
 
                 )
             }
-
         }
     }
 }

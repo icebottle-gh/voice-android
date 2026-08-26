@@ -1,6 +1,7 @@
 package org.noormahal.vp25.android.presentation.ui
 
 //import org.noormahal.vp25.android.data.StoryList
+import android.content.res.Configuration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,19 +31,17 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.viewmodel.MainViewModel
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
+import org.noormahal.vp25.android.theme.VpTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -94,9 +95,9 @@ fun StoryItem(user: User, isMyStory:Boolean=false, onClick:()->Unit){
             user.displayName
 
     val borderColor =  if (isMyStory || user.hasUnviewedStory)
-        colorResource(id = R.color.orange_A200)
+        MaterialTheme.colorScheme.primary
     else
-        colorResource(id = R.color.grey_A400)
+        MaterialTheme.colorScheme.outlineVariant
 
     Card(
         modifier = Modifier
@@ -174,8 +175,7 @@ fun StoryItem(user: User, isMyStory:Boolean=false, onClick:()->Unit){
                 //username
                 Text(
                     text = cardTitle,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.titleSmall,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     modifier = Modifier.weight(1f)
@@ -198,7 +198,7 @@ fun StoryItem(user: User, isMyStory:Boolean=false, onClick:()->Unit){
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_post_add_24),
                             contentDescription = "Add Story",
-                            tint = colorResource(id = R.color.orange_A200),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -208,13 +208,18 @@ fun StoryItem(user: User, isMyStory:Boolean=false, onClick:()->Unit){
 }
 
 
-@Preview
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun StoryItemPreview(){
-//    MyStoryCard(User("234","Sajidha Abdulla",true), true, {})
-    Column {
-        StoryItem(User("234","Sajidha Abdulla",true), true, {})
-        StoryItem(User("234","Muhammed Salih",true), false, {})
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column {
+                StoryItem(User("234", "Sajidha Abdulla", true), true, {})
+                StoryItem(User("234", "Muhammed Salih", true), false, {})
+                // Viewed story -> outlineVariant ring
+                StoryItem(User("234", "Kiki Kuku", false), false, {})
+            }
+        }
     }
-
 }

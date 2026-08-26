@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
@@ -73,13 +73,15 @@ fun AppBarView(
 
         TopAppBar(
             windowInsets = WindowInsets.statusBarsIgnoringVisibility,
-//            modifier = Modifier.safeContentPadding(),
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                scrolledContainerColor = MaterialTheme.colorScheme.surface,
+            ),
             title= {
                 Text(
                     text = title,
                     // TODO:color explicit here, change to be theme friendly
 //                color = colorResource(id = R.color.black),
-                    fontSize = 20.sp,
                     modifier = Modifier.heightIn(max = 30.dp)
                 )
             },

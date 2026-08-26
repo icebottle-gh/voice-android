@@ -35,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.noormahal.vp25.android.common.makeConnectionStatus
 import org.noormahal.vp25.android.common.makePersonalizedProfile
 import org.noormahal.ib.vakkic.dto.ConnectionStatus
@@ -167,8 +166,7 @@ fun ProfileContent(
                     )
                 ) {
                     Text(
-                        text = if (connectionStatus.isFollowing) "Unfollow" else "Follow",
-                        fontSize = 16.sp
+                        text = if (connectionStatus.isFollowing) "Unfollow" else "Follow"
                     )
                 }
                 if (connectionStatus.isFollower) {
