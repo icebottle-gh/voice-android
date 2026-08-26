@@ -40,6 +40,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,14 +58,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
@@ -72,6 +69,7 @@ import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.data.Story
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
+import org.noormahal.vp25.android.theme.StoryContentTextStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -556,17 +554,16 @@ fun StoriesPager(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Divider(thickness = 2.dp, color = colorResource(id = R.color.orange_A200))
+            Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
 
             Text(
                 modifier = Modifier.padding(vertical = 24.dp, horizontal = 8.dp),
                 text = currentStory.storyDetails,
-                style = TextStyle(fontSize = 18.sp),
-                textAlign = TextAlign.Left,
-                lineHeight = 28.sp
+                style = StoryContentTextStyle,
+                textAlign = TextAlign.Left
             )
 
-            Divider(thickness = 2.dp, color = colorResource(id = R.color.orange_A200))
+            Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.height(40.dp))
 
         }
@@ -607,15 +604,14 @@ fun StoriesTopBar(name: String, storyCount: Int, storyIndex: Int,timeProgress:Fl
             ){
                 Text(
                     text = name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.heightIn(max = 30.dp),
                     overflow = TextOverflow.Ellipsis
                 )
                 Row {
-                    Text(text = "Yesterday", fontSize = 12.sp)
-                    Text(text = ", ", fontSize = 12.sp)
-                    Text(text = "10:45 pm", fontSize = 12.sp)
+                    Text(text = "Yesterday", style = MaterialTheme.typography.labelSmall)
+                    Text(text = ", ", style = MaterialTheme.typography.labelSmall)
+                    Text(text = "10:45 pm", style = MaterialTheme.typography.labelSmall)
                 }
             }
 
@@ -773,7 +769,7 @@ fun ShimmerStory(paddingValues: PaddingValues) {
         verticalArrangement = Arrangement.Center
     ) {
 
-        Divider(thickness = 2.dp, color = colorResource(id = R.color.orange_A200))
+        Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(24.dp))
         Column() {
             Box(modifier = Modifier
@@ -808,7 +804,7 @@ fun ShimmerStory(paddingValues: PaddingValues) {
                 .shimmerEffect())
         }
         Spacer(modifier = Modifier.height(24.dp))
-        Divider(thickness = 2.dp, color = colorResource(id = R.color.orange_A200))
+        Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
     }
 }
 

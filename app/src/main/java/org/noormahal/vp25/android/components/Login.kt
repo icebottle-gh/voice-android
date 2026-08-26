@@ -26,7 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.presentation.ui.LoginInfo
 
@@ -77,7 +76,7 @@ fun Login(
 
         if (!otpSent) {
             // ── Step 1: enter phone / email ───────────────────────────────
-            Text(text = "Login / Register", fontSize = 18.sp)
+            Text(text = "Login / Register", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!isEmail) {
