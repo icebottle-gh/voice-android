@@ -70,12 +70,11 @@ fun Login(
         Image(
             painter = painterResource(id = R.drawable.app_logo),
             contentDescription = "Logo",
-            modifier = Modifier.size(190.dp)
+            modifier = Modifier.size(96.dp)
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (!otpSent) {
-            // ── Step 1: enter phone / email ───────────────────────────────
             Text(text = "Login / Register", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -103,7 +102,7 @@ fun Login(
                 Text(text = "Send OTP")
             }
         } else {
-            // ── Step 2: enter OTP ─────────────────────────────────────────
+
             val sentTo = if (isEmail) loginInfo.email
                          else "${loginInfo.phoneCountryCode} ${loginInfo.phone}"
 
