@@ -7,7 +7,7 @@
     <!--    Splash Screen-->
     <style name="Theme.VP25.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/orange_black_800</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/app_logo</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/orange_black_800</item>
     </style>
 </resources>
