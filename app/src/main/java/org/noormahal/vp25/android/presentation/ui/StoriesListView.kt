@@ -51,9 +51,9 @@ fun StoriesList(navController: NavHostController, mainViewModel: MainViewModel, 
     val usersList = MutableStateFlow(listOf(
         User("Saji", "Sajidha Abdulla", true),
         User("sali", "Muhammed Salih", true),
-        User("hahi", "Hahahahahha", true),
-        User("kiki", "Kiki Kuku", false),
-        User("chuchu", "ChuChuChuChu", false),
+        User("hahi", "Ravi", true),
+        User("kiki", "Ahmed", false),
+        User("chuchu", "Dani", false),
     ))
 
 
@@ -218,7 +218,7 @@ fun StoryItemPreview(){
                 StoryItem(User("234", "Sajidha Abdulla", true), true, {})
                 StoryItem(User("234", "Muhammed Salih", true), false, {})
                 // Viewed story -> outlineVariant ring
-                StoryItem(User("234", "Kiki Kuku", false), false, {})
+                StoryItem(User("234", "John Doe", false), false, {})
             }
         }
     }
