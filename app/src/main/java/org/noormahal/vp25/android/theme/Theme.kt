@@ -40,6 +40,7 @@ private val DarkColorScheme = darkColorScheme(
 
     surfaceVariant = OrangeBlack700,
     onSurfaceVariant = GreyA400,
+    error = darkRed
 
 //    outline = GreyA700,          // Borders, dividers
 //    error = Orange700,
@@ -69,9 +70,6 @@ private val LightColorScheme = lightColorScheme(
     secondaryContainer = Orange50,
     onSecondaryContainer = OrangeBlack800,
 
-//    outline = GreyA400,         // Dividers, borders
-//    error = Color(0xFFB00020),
-//    onError = White
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
