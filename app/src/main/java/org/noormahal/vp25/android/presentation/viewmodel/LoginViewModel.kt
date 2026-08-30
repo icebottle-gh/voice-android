@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.noormahal.ib.vakkic.AppImpl
 import org.noormahal.ib.vakkic.UserImpl
 
@@ -24,6 +25,8 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
 
     private val _otp = mutableStateOf("")
     val otp: State<String> = _otp
+    private val _loginError = mutableStateOf<String?>(null)
+    val loginError: State<String?> = _loginError
     fun setLoggedIn(loggedIn: Boolean) {
         _isLoggedIn.value = loggedIn
     }
@@ -36,34 +39,36 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
     }
 
     fun requestOtp(mobile: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
-                println("calling api")
-                Client.app.requestLoginOtp(mobile)
-                _otp.value = Client.app.peekOtp(mobile)
-                println(_otp.value)
+                val otp = withContext(Dispatchers.IO) {
+                    Client.app.requestLoginOtp(mobile)
+                    Client.app.peekOtp(mobile)
+                }
+                _otp.value = otp
             } catch (e: Exception) {
-                // handle error
-                println(e)
                 e.printStackTrace()
             }
-
         }
     }
 
     fun login(mobile: String, otp: String, onSuccess: () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        _loginError.value = null
+        viewModelScope.launch {
             try {
-                Client.user = Client.app.login(mobile, otp)
-                appSecretDao.setSecret(Client.user!!.serialize())
+                val loggedInUser = withContext(Dispatchers.IO) {
+                    val user = Client.app.login(mobile, otp)
+                    appSecretDao.setSecret(user.serialize())
+                    user
+                }
+                Client.user = loggedInUser
                 setLoggedIn(true)
                 onSuccess()
             } catch (e: Exception) {
-                println(e)
                 e.printStackTrace()
+                _loginError.value = e.message ?: "Something went wrong. Please try again."
             }
         }
-
     }
 
     private fun wake() {
