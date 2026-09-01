@@ -1,11 +1,18 @@
 package org.noormahal.vp25.android.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,8 +29,15 @@ fun VpTextField(
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    placeholder: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     enabled: Boolean = true,
+    readOnly: Boolean = false,
+    isError: Boolean = false,
+    supportingText: String? = null,
+    minLines: Int = 1,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     maxLength: Int? = null,
     digitOnly: Boolean = false,
 ) {
@@ -34,67 +48,89 @@ fun VpTextField(
             if (maxLength == null || filtered.length <= maxLength) onValueChange(filtered)
         },
         label = { Text(text = label) },
+        placeholder = placeholder?.let { { Text(text = it) } },
         modifier = modifier,
-        singleLine = true,
+        singleLine = minLines <= 1,
+        minLines = minLines,
         enabled = enabled,
+        readOnly = readOnly,
+        isError = isError,
+        supportingText = supportingText?.let { { Text(text = it) } },
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         shape = RoundedCornerShape(TEXT_FIELD_CORNER_RADIUS),
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun VpTextFieldEmailPreview() {
-    VpTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            VpTextField(
-                value = "user@example.com",
-                onValueChange = {},
-                label = "Email",
-                keyboardType = KeyboardType.Email,
-            )
-        }
-    }
-}
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true, widthDp = 360)
+@Preview(name = "Dark", showBackground = true, widthDp = 360, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun VpTextFieldEmailDisabledPreview() {
+fun VpTextFieldVariantsPreview() {
     VpTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            VpTextField(
-                value = "user@example.com",
-                onValueChange = {},
-                label = "Email",
-                keyboardType = KeyboardType.Email,
-                enabled = false,
-            )
-        }
-    }
-}
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Label only, empty
+                VpTextField(
+                    value = "",
+                    onValueChange = {},
+                    label = "Full Name",
+                )
 
-@Preview(showBackground = true)
-@Composable
-fun VpTextFieldOtpPreview() {
-    VpTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            VpTextField(
-                value = "123456",
-                onValueChange = {},
-                label = "OTP",
-                keyboardType = KeyboardType.Number,
-                digitOnly = true,
-                maxLength = 6,
-            )
+                // Label + placeholder
+                VpTextField(
+                    value = "",
+                    onValueChange = {},
+                    label = "Full Name",
+                    placeholder = "e.g. Jane Doe",
+                )
+
+                // Leading icon (e.g. Year of Birth)
+                VpTextField(
+                    value = "2001",
+                    onValueChange = {},
+                    label = "Year Of Birth",
+                    leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
+                )
+
+                // Trailing icon, read-only (e.g. Gender dropdown anchor)
+                VpTextField(
+                    value = "",
+                    onValueChange = {},
+                    label = "Gender",
+                    readOnly = true,
+                    trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
+                )
+
+                // Disabled with a pre-filled value (e.g. Mobile)
+                VpTextField(
+                    value = "+91 9876543210",
+                    onValueChange = {},
+                    label = "Mobile",
+                    enabled = false,
+                )
+
+                // Error + supporting text
+                VpTextField(
+                    value = "",
+                    onValueChange = {},
+                    label = "Full Name",
+                    isError = true,
+                    supportingText = "This field is required",
+                )
+
+                // Multiline
+                VpTextField(
+                    value = "",
+                    onValueChange = {},
+                    label = "Bio",
+                    minLines = 3,
+                )
+            }
         }
     }
 }
