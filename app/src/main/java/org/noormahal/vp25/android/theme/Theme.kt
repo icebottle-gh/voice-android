@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -41,6 +42,10 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = OrangeBlack700,
     onSurfaceVariant = GreyA400,
 
+    surfaceTint = Color.Transparent, // avoid Material3's tonal elevation tint on menus/dialogs
+
+    outline = GreyA700
+
 //    outline = GreyA700,          // Borders, dividers
 //    error = Orange700,
 //    onError = OrangeBlack800
@@ -64,10 +69,14 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Grey300,   // Outlined cards, filled text field background
     onSurfaceVariant = GreyA700,
 
+    surfaceTint = Color.Transparent, // avoid Material3's tonal elevation tint on menus/dialogs
+
     primaryContainer = Orange100,
     onPrimaryContainer = OrangeBlack800,
     secondaryContainer = Orange50,
     onSecondaryContainer = OrangeBlack800,
+
+    outline = GreyA400
 
 //    outline = GreyA400,         // Dividers, borders
 //    error = Color(0xFFB00020),
