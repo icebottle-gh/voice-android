@@ -1,6 +1,5 @@
 package org.noormahal.vp25.android.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,12 +8,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = OrangeA200,
@@ -43,10 +37,13 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = GreyA400,
 
     surfaceTint = OrangeBlack800,
-    outline = GreyA700,
 
     error = darkRed,
-//    onError = Color.DarkGray
+    outline = GreyA700
+
+//    outline = GreyA700,          // Borders, dividers
+//    error = Orange700,
+//    onError = OrangeBlack800
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -67,16 +64,15 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Grey300,   // Outlined cards, filled text field background
     onSurfaceVariant = GreyA700,
 
-    surfaceTint = White,
-
     primaryContainer = Orange100,
     onPrimaryContainer = OrangeBlack800,
     secondaryContainer = Orange50,
     onSecondaryContainer = OrangeBlack800,
 
+    surfaceTint = White,
     outline = GreyA400
 
-
+//    outline = GreyA400,         // Dividers, borders
 //    error = Color(0xFFB00020),
 //    onError = White
 

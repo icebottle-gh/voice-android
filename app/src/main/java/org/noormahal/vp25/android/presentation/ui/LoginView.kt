@@ -1,10 +1,10 @@
 package org.noormahal.vp25.android.presentation.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.noormahal.vp25.android.components.Login
@@ -13,12 +13,15 @@ import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
 
 @Composable
 fun LoginView(onLoginSuccess: () -> Unit, loginViewModel: LoginViewModel = viewModel()) {
-    val scope = rememberCoroutineScope()
-    val otp by loginViewModel.otp
+    val peekedOtp by loginViewModel.otp
+    val loginError by loginViewModel.loginError
     var mobile by remember {
         mutableStateOf("")
     }
     var email by remember {
+        mutableStateOf("")
+    }
+    var otp by remember {
         mutableStateOf("")
     }
     var otpSent by remember {
@@ -28,10 +31,16 @@ fun LoginView(onLoginSuccess: () -> Unit, loginViewModel: LoginViewModel = viewM
         mutableStateOf("")
     }
 
+    val isEmail = false
+    val identifier = phoneCountryCode + mobile
+
+    LaunchedEffect(peekedOtp) {
+        if (peekedOtp.isNotEmpty()) otp = peekedOtp
+    }
 
     Login(
         otpSent = otpSent,
-        isEmail = false,
+        isEmail = isEmail,
         loginInfo = LoginInfo(
             phoneCountryCode,
             mobile,
@@ -42,24 +51,24 @@ fun LoginView(onLoginSuccess: () -> Unit, loginViewModel: LoginViewModel = viewM
         onPhoneChange = { mobile = it },
         onEmailChange= { email = it },
         onSendOTP= {
-            loginViewModel.requestOtp(mobile=mobile)
+            loginViewModel.requestOtp(identifier)
             otpSent=true
         },
-        onOtpChange= {
-            // TODO typing otp
-        },
+        onOtpChange= { otp = it },
         onChangeNumber= {
             otpSent = false
+            otp = ""
         },
         onChangeEmail= {
             otpSent = false
+            otp = ""
         },
         onResendOTP= {
-             loginViewModel.requestOtp(phoneCountryCode+mobile)
+             loginViewModel.requestOtp(identifier)
         },
+        errorMessage = loginError,
     ) {
-        //OnSubmit
-        onLoginSuccess()
+        loginViewModel.login(identifier, otp, onLoginSuccess)
     }
 
 

@@ -64,7 +64,7 @@ fun VpOtpField(
                 repeat(length) { index ->
                     OtpBox(
                         char = value.getOrNull(index),
-                        isActive = isFocused && index == value.length,
+                        isActive = isFocused && value.length < length && index == value.length,
                         enabled = enabled,
                         isError = isError,
                     )

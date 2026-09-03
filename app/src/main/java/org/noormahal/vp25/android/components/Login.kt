@@ -42,6 +42,7 @@ fun Login(
     onChangeNumber: () -> Unit,
     onChangeEmail: () -> Unit,
     onResendOTP: () -> Unit,
+    errorMessage: String? = null,
     onSubmit: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -82,7 +83,7 @@ fun Login(
                 VpMobileNumberField(
                     mobileNumber = loginInfo.phone,
                     onMobileNumberChange = onPhoneChange,
-                    onCountrySelected = { onCountryCodeChange(it.countryCode) },
+                    onCountrySelected = { onCountryCodeChange(it.countryPhoneNumberCode) },
                 )
             } else {
                 VpTextField(
@@ -134,7 +135,17 @@ fun Login(
                 value = loginInfo.otp,
                 onValueChange = onOtpChange,
                 length = otpDigits,
+                isError = errorMessage != null,
             )
+
+            if (errorMessage != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
             Button(
@@ -201,6 +212,26 @@ fun LoginOtpPreview() {
         onChangeNumber = {},
         onChangeEmail = {},
         onResendOTP = {},
+        onSubmit = {}
+    )
+}
+
+@Composable
+@Preview(showBackground = true, apiLevel = 34)
+fun LoginOtpErrorPreview() {
+    Login(
+        otpSent = true,
+        isEmail = false,
+        loginInfo = LoginInfo("+91", "9876543210", "", "123456"),
+        onCountryCodeChange = {},
+        onPhoneChange = {},
+        onEmailChange = {},
+        onSendOTP = {},
+        onOtpChange = {},
+        onChangeNumber = {},
+        onChangeEmail = {},
+        onResendOTP = {},
+        errorMessage = "OTP is incorrect",
         onSubmit = {}
     )
 }
