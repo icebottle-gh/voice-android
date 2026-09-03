@@ -1,6 +1,5 @@
 package org.noormahal.vp25.android.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,11 +8,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = OrangeA200,
@@ -40,7 +35,11 @@ private val DarkColorScheme = darkColorScheme(
 
     surfaceVariant = OrangeBlack700,
     onSurfaceVariant = GreyA400,
-    error = darkRed
+
+    surfaceTint = OrangeBlack800,
+
+    error = darkRed,
+    outline = GreyA700
 
 //    outline = GreyA700,          // Borders, dividers
 //    error = Orange700,
@@ -70,6 +69,12 @@ private val LightColorScheme = lightColorScheme(
     secondaryContainer = Orange50,
     onSecondaryContainer = OrangeBlack800,
 
+    surfaceTint = White,
+    outline = GreyA400
+
+//    outline = GreyA400,         // Dividers, borders
+//    error = Color(0xFFB00020),
+//    onError = White
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
