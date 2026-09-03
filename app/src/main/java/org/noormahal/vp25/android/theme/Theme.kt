@@ -42,13 +42,11 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = OrangeBlack700,
     onSurfaceVariant = GreyA400,
 
-    surfaceTint = Color.Transparent, // avoid Material3's tonal elevation tint on menus/dialogs
+    surfaceTint = OrangeBlack800,
+    outline = GreyA700,
 
-    outline = GreyA700
-
-//    outline = GreyA700,          // Borders, dividers
-//    error = Orange700,
-//    onError = OrangeBlack800
+    error = darkRed,
+//    onError = Color.DarkGray
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -69,7 +67,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Grey300,   // Outlined cards, filled text field background
     onSurfaceVariant = GreyA700,
 
-    surfaceTint = Color.Transparent, // avoid Material3's tonal elevation tint on menus/dialogs
+    surfaceTint = White,
 
     primaryContainer = Orange100,
     onPrimaryContainer = OrangeBlack800,
@@ -78,7 +76,7 @@ private val LightColorScheme = lightColorScheme(
 
     outline = GreyA400
 
-//    outline = GreyA400,         // Dividers, borders
+
 //    error = Color(0xFFB00020),
 //    onError = White
 

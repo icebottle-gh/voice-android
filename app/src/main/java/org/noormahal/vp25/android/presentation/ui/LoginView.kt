@@ -31,7 +31,7 @@ fun LoginView(onLoginSuccess: () -> Unit, loginViewModel: LoginViewModel = viewM
 
     Login(
         otpSent = otpSent,
-        isEmail = true,
+        isEmail = false,
         loginInfo = LoginInfo(
             phoneCountryCode,
             mobile,

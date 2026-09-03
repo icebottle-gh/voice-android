@@ -25,6 +25,7 @@ fun VpMobileNumberField(
     onMobileNumberChange: (String) -> Unit,
     onCountrySelected: (CountryDetails) -> Unit,
     modifier: Modifier = Modifier,
+    showArrowDropDown: Boolean = true,
     enabled: Boolean = true,
 ) {
     val selectedCountryState: MutableState<CountryDetails?> = remember { mutableStateOf(null) }
@@ -38,11 +39,12 @@ fun VpMobileNumberField(
             onCountrySelected(it)
         },
         showCountryFlag = false,
-        showCountryCode = true,
+        showCountryCode = false,
         showCountryPhoneCode = true,
+        showArrowDropDown = showArrowDropDown,
         spaceAfterCountryCode = COUNTRY_CODE_SPACING,
         spaceAfterCountryPhoneCode = COUNTRY_CODE_SPACING,
-        verticalDividerColor = MaterialTheme.colorScheme.onSurface.copy(
+        verticalDividerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(
             alpha = if (enabled) 1f else DISABLED_ALPHA
         ),
         enabled = enabled,
@@ -81,6 +83,7 @@ fun VpMobileNumberFieldDisabledPreview() {
                 onMobileNumberChange = {},
                 onCountrySelected = {},
                 enabled = false,
+                showArrowDropDown = false
             )
         }
     }

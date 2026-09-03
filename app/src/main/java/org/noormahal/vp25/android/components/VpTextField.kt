@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.theme.VpTheme
 
 private val TEXT_FIELD_CORNER_RADIUS = 10.dp
+private val NAME_ALLOWED_SYMBOLS = charArrayOf('\'', '-', '.')
 
 @Composable
 fun VpTextField(
@@ -40,11 +41,16 @@ fun VpTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     maxLength: Int? = null,
     digitOnly: Boolean = false,
+    lettersOnly: Boolean = false,
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = { input ->
-            val filtered = if (digitOnly) input.filter { it.isDigit() } else input
+            val filtered = when {
+                digitOnly -> input.filter { it.isDigit() }
+                lettersOnly -> input.filter { it.isLetter() || it.isWhitespace() || it in NAME_ALLOWED_SYMBOLS }
+                else -> input
+            }
             if (maxLength == null || filtered.length <= maxLength) onValueChange(filtered)
         },
         label = { Text(text = label) },
