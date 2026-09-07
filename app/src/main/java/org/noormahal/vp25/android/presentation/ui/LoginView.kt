@@ -28,10 +28,9 @@ fun LoginView(onLoginSuccess: () -> Unit, loginViewModel: LoginViewModel = viewM
         mutableStateOf(false)
     }
     var phoneCountryCode by remember {
-        mutableStateOf("+91")
+        mutableStateOf("")
     }
 
-    // Mobile is the intended login identifier (email is UI-only for now, not wired up).
     val isEmail = false
     val identifier = phoneCountryCode + mobile
 

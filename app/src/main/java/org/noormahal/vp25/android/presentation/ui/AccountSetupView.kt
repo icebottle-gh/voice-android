@@ -1,10 +1,6 @@
 package org.noormahal.vp25.android.presentation.ui
 
-import android.app.DatePickerDialog
-import android.widget.DatePicker
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,16 +11,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,213 +27,149 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import org.noormahal.vp25.android.components.ButtonStyle
+import org.noormahal.vp25.android.components.VpButton
+import org.noormahal.vp25.android.components.VpTextField
+import org.noormahal.vp25.android.components.VpYearPicker
+import org.noormahal.vp25.android.theme.VpTheme
+
+private val FIELD_SPACING = 12.dp
+private const val MIN_FULL_NAME_LENGTH = 2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountSetupView(onSubmit: () -> Unit) {
-    val spacerHeight = 20.dp
-
     var fullName by remember { mutableStateOf("") }
-    var bio by remember { mutableStateOf("") }
+    var fullNameTouched by remember { mutableStateOf(false) }
+    var yearOfBirth by remember { mutableStateOf<Int?>(null) }
 
     val genderOptions = listOf("Male", "Female", "Other")
-    var expanded by remember { mutableStateOf(false) }
-    var selectedGender by remember { mutableStateOf("") } // Initial selection
+    var genderExpanded by remember { mutableStateOf(false) }
+    var selectedGender by remember { mutableStateOf("") }
 
+    // Mobile is already verified at login; this screen only displays it.
+    // TODO: populate from the logged-in user once that's wired up.
+    val mobile by remember { mutableStateOf("") }
 
-    val context = LocalContext.current
-    val calendar = remember { Calendar.getInstance() }
-    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())}
+    val isFullNameValid = fullName.trim().length >= MIN_FULL_NAME_LENGTH
+    val fullNameError = fullNameTouched && !isFullNameValid
 
-    var dob by remember { mutableStateOf("") }
-
-    val showDatePicker = {
-        DatePickerDialog(
-            context,
-            { _: DatePicker, year: Int, month: Int, day: Int ->
-                calendar.set(year, month, day)
-                dob = dateFormat.format(calendar.time)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).apply {
-            datePicker.maxDate = System.currentTimeMillis()
-        }.show()
-    }
+    val isFormValid = isFullNameValid && yearOfBirth != null && selectedGender.isNotBlank()
 
     val scrollState = rememberScrollState()
+    val focusManager = LocalFocusManager.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            }
             .systemBarsPadding()
-            .padding(20.dp)
+            .padding(horizontal = 64.dp, vertical = 24.dp)
             .imePadding()
             .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.Start
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = "Account Setup",
-            style = MaterialTheme.typography.headlineSmall
+            text = "Let's get you set up",
+            style = MaterialTheme.typography.titleLarge,
+//            fontWeight = FontWeight.Thin,
         )
-        Spacer(modifier = Modifier.height(40.dp))
 
-        //MOBILE
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(32.dp))
+
+        VpTextField(
+            value = mobile,
+            onValueChange = {},
+            label = "Mobile",
             modifier = Modifier.fillMaxWidth(),
-            value = "",
+            keyboardType = KeyboardType.Phone,
             enabled = false,
-            onValueChange = {},
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            label = { Text(text = "Mobile") }
         )
-        Spacer(modifier = Modifier.height(spacerHeight))
+        Spacer(modifier = Modifier.height(FIELD_SPACING))
 
-        //FULL NAME
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+        VpTextField(
             value = fullName,
-            enabled = true,
-            onValueChange = {fullName = it},
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            label = { Text(text = "Full Name") }
+            onValueChange = {
+                fullName = it
+                fullNameTouched = true
+            },
+            label = "Full Name",
+            modifier = Modifier.fillMaxWidth(),
+            lettersOnly = true,
+            isError = fullNameError,
+            supportingText = if (fullNameError) {
+                "Enter at least $MIN_FULL_NAME_LENGTH characters"
+            } else {
+                null
+            },
         )
-        Spacer(modifier = Modifier.height(spacerHeight))
+        Spacer(modifier = Modifier.height(FIELD_SPACING))
 
-        //DOB
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .pointerInput(Unit) {
-                    println("in pointer input")
-                    awaitEachGesture {
-                        // Modifier.clickable doesn't work for text fields, so we use Modifier.pointerInput
-                        // in the Initial pass to observe events before the text field consumes them
-                        // in the Main pass.
-                        awaitFirstDown(pass = PointerEventPass.Initial)
-                        val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
-                        if (upEvent != null) {
-                            showDatePicker()
-                        }
-                    }
-
-                },
-            value = dob,
-            enabled = true,
-            onValueChange = {},
-            singleLine = true,
-            readOnly = true,
-            label = { Text(text = "Date Of Birth") }
+        VpYearPicker(
+            value = yearOfBirth,
+            onValueChange = { yearOfBirth = it },
+            label = "Year Of Birth",
+            modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(modifier = Modifier.height(spacerHeight))
+        Spacer(modifier = Modifier.height(FIELD_SPACING))
 
-        //GENDER DROPDOWN
         ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
+            expanded = genderExpanded,
+            onExpandedChange = { genderExpanded = !genderExpanded },
             modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedTextField(
+            VpTextField(
+                value = selectedGender,
+                onValueChange = {},
+                label = "Gender",
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(),
-                value = selectedGender,
-                onValueChange = { }, // Read-only for dropdown
                 readOnly = true,
-                label = { Text("Gender") },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = expanded
-                    )
-                },
-//                colors = ExposedDropdownMenuDefaults.textFieldColors()
+                trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
             )
 
             ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                expanded = genderExpanded,
+                onDismissRequest = { genderExpanded = false }
             ) {
                 genderOptions.forEach { selectionOption ->
                     DropdownMenuItem(
                         text = { Text(text = selectionOption) },
                         onClick = {
                             selectedGender = selectionOption
-                            expanded = false
+                            genderExpanded = false
                         }
                     )
                 }
             }
         }
-        Spacer(modifier = Modifier.height(spacerHeight))
+        Spacer(modifier = Modifier.height(32.dp))
 
-//        //EMAIL
-//        TextField(
-//            modifier = Modifier.fillMaxWidth(),
-//            value = "",
-//            enabled = true,
-//            onValueChange = {},
-//            singleLine = true,
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-//            label = { Text(text = "Email") }
-//        )
-//        Spacer(modifier = Modifier.height(spacerHeight))
-//
-//        //ALTERNATE MOBILE
-//        TextField(
-//            modifier = Modifier.fillMaxWidth(),
-//            value = "",
-//            enabled = true,
-//            onValueChange = {},
-//            singleLine = true,
-//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-//            label = { Text(text = "Alternate Mobile") }
-//        )
-//        Spacer(modifier = Modifier.height(spacerHeight))
-
-        //BIO
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = bio,
-            enabled = true,
-            onValueChange = {bio=it},
-            minLines = 3,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            label = { Text(text = "Bio") }
+        VpButton(
+            label = { Text(text = "Submit") },
+            onClick = onSubmit,
+            style = ButtonStyle.SQUARE_PRIMARY,
+            enabled = isFormValid,
+            fullWidth = true,
         )
-        Spacer(modifier = Modifier.height(30.dp))
-
-
-        Button(
-            onClick = {
-                      //TODO Go to Home Screen, if info is valid.
-                      onSubmit()
-            },
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Text(text = "Submit")
-        }
     }
-
 }
 
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-@Preview
-fun AccountSetupPreview(){
-    AccountSetupView {
-
+fun AccountSetupPreview() {
+    VpTheme {
+        AccountSetupView {}
     }
 }
