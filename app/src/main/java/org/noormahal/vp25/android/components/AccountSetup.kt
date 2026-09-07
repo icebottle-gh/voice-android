@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.noormahal.vp25.android.theme.VpTheme
 
 private val FIELD_SPACING = 12.dp
 private const val MIN_FULL_NAME_LENGTH = 2
@@ -174,50 +175,56 @@ fun AccountSetup(
 @Composable
 @Preview(showBackground = true)
 fun AccountSetupEmptyPreview() {
-    AccountSetup(
-        mobile = "+91 9876543210",
-        fullName = "",
-        onFullNameChange = {},
-        yearOfBirth = null,
-        onYearOfBirthChange = {},
-        selectedGender = "",
-        onGenderChange = {},
-        isSubmitting = false,
-        errorMessage = null,
-        onSubmit = {},
-    )
+    VpTheme {
+        AccountSetup(
+            mobile = "+91 9876543210",
+            fullName = "",
+            onFullNameChange = {},
+            yearOfBirth = null,
+            onYearOfBirthChange = {},
+            selectedGender = "",
+            onGenderChange = {},
+            isSubmitting = false,
+            errorMessage = null,
+            onSubmit = {},
+        )
+    }
 }
 
 @Composable
 @Preview(showBackground = true)
 fun AccountSetupFilledPreview() {
-    AccountSetup(
-        mobile = "+91 9876543210",
-        fullName = "Ayesha Khan",
-        onFullNameChange = {},
-        yearOfBirth = 1995,
-        onYearOfBirthChange = {},
-        selectedGender = "Female",
-        onGenderChange = {},
-        isSubmitting = false,
-        errorMessage = null,
-        onSubmit = {},
-    )
+    VpTheme {
+        AccountSetup(
+            mobile = "+91 9876543210",
+            fullName = "Ayesha Khan",
+            onFullNameChange = {},
+            yearOfBirth = 1995,
+            onYearOfBirthChange = {},
+            selectedGender = "Female",
+            onGenderChange = {},
+            isSubmitting = false,
+            errorMessage = null,
+            onSubmit = {},
+        )
+    }
 }
 
 @Composable
 @Preview(showBackground = true)
 fun AccountSetupErrorPreview() {
-    AccountSetup(
-        mobile = "+91 9876543210",
-        fullName = "Ayesha Khan",
-        onFullNameChange = {},
-        yearOfBirth = 1995,
-        onYearOfBirthChange = {},
-        selectedGender = "Female",
-        onGenderChange = {},
-        isSubmitting = false,
-        errorMessage = "Something went wrong. Please try again.",
-        onSubmit = {},
-    )
+    VpTheme {
+        AccountSetup(
+            mobile = "+91 9876543210",
+            fullName = "Ayesha Khan",
+            onFullNameChange = {},
+            yearOfBirth = 1995,
+            onYearOfBirthChange = {},
+            selectedGender = "Female",
+            onGenderChange = {},
+            isSubmitting = false,
+            errorMessage = "Something went wrong. Please try again.",
+            onSubmit = {},
+        )
+    }
 }
