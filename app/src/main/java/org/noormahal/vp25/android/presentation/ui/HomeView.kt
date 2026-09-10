@@ -2,6 +2,10 @@ package org.noormahal.vp25.android.presentation.ui
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -15,8 +19,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.noormahal.vp25.android.R
+import org.noormahal.vp25.android.components.VpTopAppBar
+import org.noormahal.vp25.android.components.VpTopAppBarAction
 import org.noormahal.vp25.android.presentation.navigation.HomeNavGraph
 import org.noormahal.vp25.android.presentation.navigation.Screen
+import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 import org.noormahal.vp25.android.presentation.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 
@@ -71,10 +78,27 @@ fun HomeView() {
             )
         },
         topBar = {
-            AppBarView(
-                currentScreen = currentScreen,
-                title = title,
-            )
+            //so as to control visibility based on diff situations BACK OR DRAWER
+            if (currentScreen in screensWithBottom) {
+                VpTopAppBar(
+                    title = title,
+                    leadingIcon = if (currentScreen == Screen.BottomScreen.Stories) {
+                        Icons.Default.AccountCircle
+                    } else {
+                        Icons.Filled.ArrowBack
+                    },
+                    leadingIconContentDescription = if (currentScreen == Screen.BottomScreen.Stories) "Menu" else null,
+                    onLeadingIconClick = {
+                        //Open the drawer - its a suspend function remember
+                        //TODO: side drawer
+                    },
+                    actions = listOf(
+                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                    )
+                )
+            }
         },
         floatingActionButton = floatingButton,
         contentWindowInsets = WindowInsets.safeDrawing

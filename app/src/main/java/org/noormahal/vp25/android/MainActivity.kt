@@ -24,17 +24,13 @@ class MainActivity : ComponentActivity() {
             loginViewModel.isLoadingSession.value
         }
         enableEdgeToEdge()
-        //Draw content edge to edge
-//        WindowCompat.setDecorFitsSystemWindows(window,false)
+
         setContent {
-//            WindowInsets.statusBars
             VpTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-//                    AccountSetupView()
                     AppNavGraph(loginViewModel)
                 }
             }
