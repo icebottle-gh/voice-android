@@ -13,7 +13,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -24,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.components.FabStyle
+import org.noormahal.vp25.android.components.VpBottomBar
 import org.noormahal.vp25.android.components.VpFab
 import org.noormahal.vp25.android.components.VpTopAppBar
 import org.noormahal.vp25.android.components.VpTopAppBarAction
@@ -31,7 +31,6 @@ import org.noormahal.vp25.android.presentation.navigation.HomeNavGraph
 import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 import org.noormahal.vp25.android.presentation.viewmodel.MainViewModel
-import kotlinx.coroutines.CoroutineScope
 import org.noormahal.vp25.android.theme.VpTheme
 
 
@@ -39,7 +38,6 @@ import org.noormahal.vp25.android.theme.VpTheme
 fun HomeView() {
 
 //    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope: CoroutineScope = rememberCoroutineScope() //cause opening and closing drawer is a suspend function
     val mainViewModel: MainViewModel = viewModel()
 
     // Allow us to find out on which view we currently are
@@ -48,13 +46,11 @@ fun HomeView() {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val currentScreen by mainViewModel.currentScreen.collectAsState()
-    val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
 
     HomeScreen(
         currentScreen = currentScreen,
-        title = title,
         currentRoute = currentRoute,
-        controller = controller
+        onBottomScreenClick = { screen -> controller.navigate(screen.route) }
     ) { pd ->
         HomeNavGraph(navController = controller, mainViewModel = mainViewModel, pd = pd)
     }
@@ -63,11 +59,12 @@ fun HomeView() {
 @Composable
 private fun HomeScreen(
     currentScreen: Screen,
-    title: String,
     currentRoute: String?,
-    controller: NavController,
+    onBottomScreenClick: (Screen) -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
+    val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
+
     val floatingButton: @Composable () -> Unit = {
         if (currentScreen == Screen.BottomScreen.Stories){
             VpFab(
@@ -90,11 +87,12 @@ private fun HomeScreen(
     Scaffold(
 //        modifier = Modifier.safeDrawingPadding(),
         bottomBar = {
-            BottomBarView(
+            VpBottomBar(
                 currentScreen = currentScreen,
 //                viewModel = viewModel,
                 currentRoute = currentRoute,
-                controller = controller
+                items = screensWithBottom,
+                onBottomScreenClick = onBottomScreenClick
             )
         },
         topBar = {
@@ -133,9 +131,8 @@ private fun HomeScreenPreview() {
     VpTheme{
         HomeScreen(
             currentScreen = Screen.BottomScreen.Stories,
-            title = "Voice",
             currentRoute = Screen.BottomScreen.Stories.bottomRoute,
-            controller = rememberNavController()
+            onBottomScreenClick = {}
         ) { pd ->
             Box(modifier = Modifier.padding(pd))
         }

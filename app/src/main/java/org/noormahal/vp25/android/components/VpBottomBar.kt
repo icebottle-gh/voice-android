@@ -1,4 +1,4 @@
-package org.noormahal.vp25.android.presentation.ui
+package org.noormahal.vp25.android.components
 
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Badge
@@ -12,55 +12,50 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import org.noormahal.vp25.android.presentation.navigation.Screen
-import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomBarView(
+fun VpBottomBar(
     currentScreen: Screen,
-//    viewModel: MainViewModel,
     currentRoute: String?,
-    controller: NavController
+    items: List<Screen.BottomScreen>,
+    onBottomScreenClick: (Screen) -> Unit
 ){
-//    val currentScreen by viewModel.currentScreen.collectAsState()
 
-    if(currentScreen in screensWithBottom){
+    if(currentScreen in items){
         NavigationBar {
-            screensWithBottom.forEach{
-                item->
-                val isSelected = currentRoute == item.bottomRoute
+            items.forEach{
+                bottomScreen->
+                val isSelected = currentRoute == bottomScreen.bottomRoute
                 NavigationBarItem(
                     selected = isSelected,
-                    onClick = {
-                              controller.navigate(item.bottomRoute)
-                    },
+                    onClick = { onBottomScreenClick(bottomScreen) },
                     icon = {
                         BadgedBox(
                             badge = {
-                                if(item.badgeCount!=null){
+                                if(bottomScreen.badgeCount!=null){
                                     Badge(modifier = Modifier.offset(x=(-4).dp, y=8.dp)){
-                                        Text(text = item.badgeCount.toString())
+                                        Text(text = bottomScreen.badgeCount.toString())
                                     }
-                                }else if(item.hasNews){
+                                }else if(bottomScreen.hasNews){
                                     Badge(modifier =  Modifier.offset(x=(-2.dp)))
                                 }
                             }
 
                         ) {
                             Icon(
-                                painter = if (currentRoute==item.bottomRoute){
-                                    painterResource(id = item.selectedIcon)
+                                painter = if (currentRoute==bottomScreen.bottomRoute){
+                                    painterResource(id = bottomScreen.selectedIcon)
                                 }else{
-                                    painterResource(id = item.unselectedIcon)
+                                    painterResource(id = bottomScreen.unselectedIcon)
                                 },
-                                contentDescription = item.title,
+                                contentDescription = bottomScreen.title,
                             )
                         }
 
                     },
-                    label = { Text(text = item.bottomTitle)}
+                    label = { Text(text = bottomScreen.bottomTitle)}
 
                 )
             }
