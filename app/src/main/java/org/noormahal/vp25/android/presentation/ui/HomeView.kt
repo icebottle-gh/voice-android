@@ -1,6 +1,9 @@
 package org.noormahal.vp25.android.presentation.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -11,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -27,6 +32,7 @@ import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 import org.noormahal.vp25.android.presentation.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
+import org.noormahal.vp25.android.theme.VpTheme
 
 
 @Composable
@@ -41,13 +47,28 @@ fun HomeView() {
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-
     val currentScreen by mainViewModel.currentScreen.collectAsState()
-
     val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
 
+    HomeScreen(
+        currentScreen = currentScreen,
+        title = title,
+        currentRoute = currentRoute,
+        controller = controller
+    ) { pd ->
+        HomeNavGraph(navController = controller, mainViewModel = mainViewModel, pd = pd)
+    }
+}
 
-    val floatingButton :  @Composable () -> Unit = {
+@Composable
+private fun HomeScreen(
+    currentScreen: Screen,
+    title: String,
+    currentRoute: String?,
+    controller: NavController,
+    content: @Composable (PaddingValues) -> Unit
+) {
+    val floatingButton: @Composable () -> Unit = {
         if (currentScreen == Screen.BottomScreen.Stories){
             VpFab(
                 icon = ImageVector.vectorResource(id = R.drawable.baseline_create_24),
@@ -65,8 +86,6 @@ fun HomeView() {
 //            )
 //        }
     }
-
-
 
     Scaffold(
 //        modifier = Modifier.safeDrawingPadding(),
@@ -103,15 +122,22 @@ fun HomeView() {
         },
         floatingActionButton = floatingButton,
         contentWindowInsets = WindowInsets.safeDrawing
-        ){
-        HomeNavGraph(navController = controller, mainViewModel = mainViewModel, pd = it)
+        ){ pd ->
+        content(pd)
     }
 }
 
-//
-//@Preview
-//@Composable
-////fun MainViewPreview(){
-////    MainView(it)
-////}
-
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    VpTheme{
+        HomeScreen(
+            currentScreen = Screen.BottomScreen.Stories,
+            title = "Voice",
+            currentRoute = Screen.BottomScreen.Stories.bottomRoute,
+            controller = rememberNavController()
+        ) { pd ->
+            Box(modifier = Modifier.padding(pd))
+        }
+    }
+}
