@@ -6,19 +6,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.noormahal.vp25.android.R
+import org.noormahal.vp25.android.components.FabStyle
+import org.noormahal.vp25.android.components.VpFab
 import org.noormahal.vp25.android.components.VpTopAppBar
 import org.noormahal.vp25.android.components.VpTopAppBarAction
 import org.noormahal.vp25.android.presentation.navigation.HomeNavGraph
@@ -48,20 +49,20 @@ fun HomeView() {
 
     val floatingButton :  @Composable () -> Unit = {
         if (currentScreen == Screen.BottomScreen.Stories){
-            FloatingActionButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_create_24),
-                    contentDescription = "New Story"
-                )
-            }
+            VpFab(
+                icon = ImageVector.vectorResource(id = R.drawable.baseline_create_24),
+                contentDescription = "New Story",
+                onClick = { /*TODO*/ },
+                style = FabStyle.SQUIRCLE_PRIMARY
+            )
         }
 //        else if (currentScreen == Screen.BottomScreen.Chats){
-//            FloatingActionButton(onClick = { /*TODO*/ }) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.baseline_message_24),
-//                    contentDescription = "New Message"
-//                )
-//            }
+//            VpFab(
+//                icon = ImageVector.vectorResource(id = R.drawable.baseline_message_24),
+//                contentDescription = "New Message",
+//                onClick = { /*TODO*/ },
+//                style = FabStyle.SQUIRCLE_PRIMARY
+//            )
 //        }
     }
 
