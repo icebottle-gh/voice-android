@@ -39,13 +39,12 @@ import androidx.navigation.NavHostController
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.navigation.Screen
-import org.noormahal.vp25.android.presentation.viewmodel.MainViewModel
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
 import org.noormahal.vp25.android.theme.VpTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun StoriesList(navController: NavHostController, mainViewModel: MainViewModel, storiesViewModel : StoriesViewModel) {
+fun StoriesList(navController: NavHostController, storiesViewModel : StoriesViewModel) {
 //    val usersList = storiesViewModel.usersList.collectAsState(initial = listOf())
 
     val usersList = MutableStateFlow(listOf(

@@ -39,6 +39,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceTint = OrangeBlack800,
 
     error = darkRed,
+    onError = onDarkRed,
     outline = GreyA700
 
 //    outline = GreyA700,          // Borders, dividers

@@ -11,14 +11,14 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.noormahal.vp25.android.R
@@ -29,8 +29,8 @@ import org.noormahal.vp25.android.components.VpTopAppBar
 import org.noormahal.vp25.android.components.VpTopAppBarAction
 import org.noormahal.vp25.android.presentation.navigation.HomeNavGraph
 import org.noormahal.vp25.android.presentation.navigation.Screen
+import org.noormahal.vp25.android.presentation.navigation.allScreens
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
-import org.noormahal.vp25.android.presentation.viewmodel.MainViewModel
 import org.noormahal.vp25.android.theme.VpTheme
 
 
@@ -38,21 +38,32 @@ import org.noormahal.vp25.android.theme.VpTheme
 fun HomeView() {
 
 //    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val mainViewModel: MainViewModel = viewModel()
 
     // Allow us to find out on which view we currently are
     val controller: NavController = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val currentScreen by mainViewModel.currentScreen.collectAsState()
+    // currentScreen is fully derived from currentRoute - the NavController back stack
+    // is the single source of truth, so this never needs manual syncing.
+    val currentScreen = remember(currentRoute) {
+        allScreens.find { it.route == currentRoute } ?: Screen.BottomScreen.Stories
+    }
 
     HomeScreen(
         currentScreen = currentScreen,
         currentRoute = currentRoute,
-        onBottomScreenClick = { screen -> controller.navigate(screen.route) }
+        onBottomScreenClick = { screen ->
+            controller.navigate(screen.route) {
+                popUpTo(controller.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
     ) { pd ->
-        HomeNavGraph(navController = controller, mainViewModel = mainViewModel, pd = pd)
+        HomeNavGraph(navController = controller, pd = pd)
     }
 }
 
@@ -74,14 +85,14 @@ private fun HomeScreen(
                 style = FabStyle.SQUIRCLE_PRIMARY
             )
         }
-//        else if (currentScreen == Screen.BottomScreen.Chats){
-//            VpFab(
-//                icon = ImageVector.vectorResource(id = R.drawable.baseline_message_24),
-//                contentDescription = "New Message",
-//                onClick = { /*TODO*/ },
-//                style = FabStyle.SQUIRCLE_PRIMARY
-//            )
-//        }
+        else if (currentScreen == Screen.BottomScreen.Chats){
+            VpFab(
+                icon = ImageVector.vectorResource(id = R.drawable.baseline_message_24),
+                contentDescription = "New Message",
+                onClick = { /*TODO*/ },
+                style = FabStyle.SQUIRCLE_PRIMARY
+            )
+        }
     }
 
     Scaffold(
