@@ -11,8 +11,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import org.noormahal.vp25.android.components.PersonProfileLongBioPreview
 import org.noormahal.vp25.android.presentation.ui.FindScreen
+import org.noormahal.vp25.android.presentation.ui.OwnProfileView
+import org.noormahal.vp25.android.presentation.ui.PersonProfileView
 import org.noormahal.vp25.android.presentation.ui.StoriesDetail
 import org.noormahal.vp25.android.presentation.ui.StoriesList
 import org.noormahal.vp25.android.presentation.viewmodel.FindScreenViewModel
@@ -55,6 +56,10 @@ fun HomeNavGraph(
             mainViewModel.setCurrentScreen(Screen.BottomScreen.Find.bottomRoute)
             FindScreen(navController, findScreenViewModel)
         }
+        composable(Screen.BottomScreen.Profile.bottomRoute){
+            mainViewModel.setCurrentScreen(Screen.BottomScreen.Profile.bottomRoute)
+            OwnProfileView()
+        }
         composable(
             Screen.StoriesDetail.route,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
@@ -65,13 +70,14 @@ fun HomeNavGraph(
         }
 
         composable(
-            route = "profile/{userId}",
+            Screen.PersonProfile.route,
             arguments = listOf(navArgument("userId") {
                 type = NavType.StringType
             })
         ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId")
-            PersonProfileLongBioPreview()
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            mainViewModel.setCurrentScreen(Screen.PersonProfile.route)
+            PersonProfileView(userId = userId)
         }
     }
 }

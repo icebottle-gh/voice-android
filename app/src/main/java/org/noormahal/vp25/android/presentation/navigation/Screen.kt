@@ -53,6 +53,14 @@ sealed class Screen(val title: String, val route: String){
             false
         )
 
+        object Profile : BottomScreen(
+            "Profile",
+            "my_profile_route",
+            R.drawable.baseline_account_circle_24,
+            R.drawable.baseline_account_circle_24,
+            false
+        )
+
     }
 
 //    sealed class DrawerScreen(val dTitle: String, val dRoute: String, @DrawableRes val icon: Int)
@@ -73,13 +81,18 @@ sealed class Screen(val title: String, val route: String){
 //        fun createRoute(storyId: Long) = "stories_detail/$storyId"
 //    }
 
+    object PersonProfile : Screen("", "profile/{userId}"){
+        fun createRoute(userId: String) = "profile/$userId"
+    }
+
 }
 
 val screensWithBottom = listOf(
+    Screen.BottomScreen.Stories,
+    Screen.BottomScreen.Find,
 //    Screen.BottomScreen.Chats,
     Screen.BottomScreen.Notifications,
-    Screen.BottomScreen.Stories,
-    Screen.BottomScreen.Find
+    Screen.BottomScreen.Profile
 )
 
 val allScreens = listOf(
@@ -89,6 +102,8 @@ val allScreens = listOf(
 //    Screen.BottomScreen.Chats,
     Screen.BottomScreen.Notifications,
     Screen.BottomScreen.Find,
+    Screen.BottomScreen.Profile,
 
-    Screen.StoriesDetail
+    Screen.StoriesDetail,
+    Screen.PersonProfile
 )
