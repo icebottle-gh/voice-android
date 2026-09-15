@@ -30,3 +30,4 @@ val OrangeBlack700 = Color(0xFF2b2622)
 val OrangeBrown = Color(0xFF7C5F4A)
 
 val darkRed = Color(0xFFB43B3B)
+val onDarkRed = Color(0xFF1D0303)

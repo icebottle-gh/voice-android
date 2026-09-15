@@ -27,19 +27,19 @@ sealed class Screen(val title: String, val route: String){
             true
         )
 
-//        object Chats: BottomScreen(
-//            "Chats",
-//            "chats_route",
-//            R.drawable.baseline_chat_bubble_outline_24,
-//            R.drawable.baseline_chat_bubble_24,
-//            true,
-//            56
-//        )
+        object Chats: BottomScreen(
+            "Chats",
+            "chats_route",
+            R.drawable.baseline_message_24,
+            R.drawable.baseline_message_24,
+            true,
+            56
+        )
 
-        object Notifications: BottomScreen(
-            "Notifications",
-            "notifications_route",
-            R.drawable.baseline_notifications_none_24,
+        object Alerts: BottomScreen(
+            "Alerts",
+            "alerts_route",
+            R.drawable.baseline_notifications_24,
             R.drawable.baseline_notifications_24,
             true,
             55
@@ -50,6 +50,14 @@ sealed class Screen(val title: String, val route: String){
             "find_people_route",
             R.drawable.baseline_person_search_24,
             R.drawable.baseline_person_search_24,
+            false
+        )
+
+        object Profile : BottomScreen(
+            "Profile",
+            "my_profile_route",
+            R.drawable.baseline_account_circle_24,
+            R.drawable.baseline_account_circle_24,
             false
         )
 
@@ -73,22 +81,29 @@ sealed class Screen(val title: String, val route: String){
 //        fun createRoute(storyId: Long) = "stories_detail/$storyId"
 //    }
 
+    object PersonProfile : Screen("", "profile/{userId}"){
+        fun createRoute(userId: String) = "profile/$userId"
+    }
+
 }
 
 val screensWithBottom = listOf(
-//    Screen.BottomScreen.Chats,
-    Screen.BottomScreen.Notifications,
     Screen.BottomScreen.Stories,
-    Screen.BottomScreen.Find
+    Screen.BottomScreen.Find,
+    Screen.BottomScreen.Chats,
+    Screen.BottomScreen.Alerts,
+    Screen.BottomScreen.Profile
 )
 
 val allScreens = listOf(
 
     Screen.Login,
     Screen.BottomScreen.Stories,
-//    Screen.BottomScreen.Chats,
-    Screen.BottomScreen.Notifications,
+    Screen.BottomScreen.Chats,
+    Screen.BottomScreen.Alerts,
     Screen.BottomScreen.Find,
+    Screen.BottomScreen.Profile,
 
-    Screen.StoriesDetail
+    Screen.StoriesDetail,
+    Screen.PersonProfile
 )

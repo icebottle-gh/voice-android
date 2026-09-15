@@ -29,6 +29,8 @@ class ProfileViewModel : ViewModel() {
     // Replace with your actual logic to get the current logged-in user's ID
     private val currentLoggedInUserId = "currentUserStaticId" // Placeholder
 
+    fun fetchOwnProfile() = fetchUserProfile(currentLoggedInUserId)
+
     fun fetchUserProfile(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, error = null) }

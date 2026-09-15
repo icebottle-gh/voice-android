@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.viewmodel.FindScreenViewModel
 import org.noormahal.ib.vakkic.dto.PersonalizedProfile
 
@@ -97,7 +98,7 @@ fun FindScreen(navController: NavController, viewModel: FindScreenViewModel) {
                 )
             }
         } else {
-            UserList(users = searchResults, onUserClick = { userId -> navController.navigate("profile/$userId") })
+            UserList(users = searchResults, onUserClick = { userId -> navController.navigate(Screen.PersonProfile.createRoute(userId)) })
         }
     }
 }
