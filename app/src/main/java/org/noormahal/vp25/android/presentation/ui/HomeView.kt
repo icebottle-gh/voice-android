@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -111,12 +110,9 @@ private fun HomeScreen(
             if (currentScreen in screensWithBottom) {
                 VpTopAppBar(
                     title = title,
-                    leadingIcon = if (currentScreen == Screen.BottomScreen.Stories) {
-                        Icons.Default.AccountCircle
-                    } else {
-                        Icons.Filled.ArrowBack
-                    },
-                    leadingIconContentDescription = if (currentScreen == Screen.BottomScreen.Stories) "Menu" else null,
+                    showLeadingIcon = currentScreen == Screen.BottomScreen.Stories,
+                    leadingIcon = Icons.Default.AccountCircle,
+                    leadingIconContentDescription = "Menu",
                     onLeadingIconClick = {
                         //Open the drawer - its a suspend function remember
                         //TODO: side drawer
