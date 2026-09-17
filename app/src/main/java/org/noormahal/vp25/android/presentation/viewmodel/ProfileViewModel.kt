@@ -3,6 +3,7 @@ package org.noormahal.vp25.android.presentation.viewmodel // Or your ViewModel p
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.noormahal.vp25.android.common.Client // Assuming your API client
+import org.noormahal.vp25.android.common.makePersonalizedProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +30,25 @@ class ProfileViewModel : ViewModel() {
     // Replace with your actual logic to get the current logged-in user's ID
     private val currentLoggedInUserId = "currentUserStaticId" // Placeholder
 
-    fun fetchOwnProfile() = fetchUserProfile(currentLoggedInUserId)
+    fun fetchOwnProfile() {
+        // TODO: no "own profile" endpoint wired up yet - currentLoggedInUserId is a
+        //  placeholder the backend doesn't know, so fetchUserProfile would 404. Fill in
+        //  dummy data instead until that's ready.
+        _uiState.update {
+            it.copy(
+                profile = makePersonalizedProfile(
+                    id = currentLoggedInUserId,
+                    fullName = "John Doe",
+                    nickName = null,
+                    bio = "I develop android apps using kotlin and jetpack compose"
+                ),
+                nickname = null,
+                isFollowing = false,
+                isLoading = false,
+                isOwnProfile = true
+            )
+        }
+    }
 
     fun fetchUserProfile(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {

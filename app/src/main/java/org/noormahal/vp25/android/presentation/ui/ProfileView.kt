@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.noormahal.vp25.android.common.makeConnectionStatus
+import org.noormahal.vp25.android.components.BroadcastGroupSummary
 import org.noormahal.vp25.android.components.PersonProfile
 import org.noormahal.vp25.android.presentation.viewmodel.ProfileViewModel
 
@@ -17,12 +18,18 @@ fun OwnProfileView(viewModel: ProfileViewModel = viewModel()) {
         viewModel.fetchOwnProfile()
     }
 
+    // TODO: ProfileViewModel doesn't fetch the user's broadcast groups yet - placeholder
+    //  data until that's wired up.
     PersonProfile(
         isLoading = uiState.isLoading,
         error = uiState.error,
         profile = uiState.profile,
         connectionStatus = null,
         isOwnProfile = true,
+        broadcastsList = listOf(
+            BroadcastGroupSummary(name = "Followers", recipientsCount = 85, isPrivate = true),
+            BroadcastGroupSummary(name = "Family", recipientsCount = 10, isPrivate = true)
+        ),
         onFollow = {},
         onUnfollow = {},
         onNickNameChange = { viewModel.updateUserNickname(it) }
