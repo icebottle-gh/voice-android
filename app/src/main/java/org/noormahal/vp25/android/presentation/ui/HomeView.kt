@@ -30,6 +30,7 @@ import org.noormahal.vp25.android.presentation.navigation.HomeNavGraph
 import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.navigation.allScreens
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
+import org.noormahal.vp25.android.presentation.navigation.screensWithTopBar
 import org.noormahal.vp25.android.theme.VpTheme
 
 
@@ -107,7 +108,7 @@ private fun HomeScreen(
         },
         topBar = {
             //so as to control visibility based on diff situations BACK OR DRAWER
-            if (currentScreen in screensWithBottom) {
+            if (currentScreen in screensWithTopBar) {
                 VpTopAppBar(
                     title = title,
                     showLeadingIcon = currentScreen == Screen.BottomScreen.Stories,
