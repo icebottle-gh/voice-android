@@ -10,7 +10,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,15 +30,11 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -54,10 +49,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,6 +61,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import org.noormahal.vp25.android.R
+import org.noormahal.vp25.android.components.VpStoriesProgressIndicator
 import org.noormahal.vp25.android.data.Story
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
@@ -581,7 +577,7 @@ fun StoriesTopBar(name: String, storyCount: Int, storyIndex: Int,timeProgress:Fl
 //            .windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility)
     ){
 //        Spacer(modifier = Modifier.height(4.dp))
-        StoriesProgressIndicator(storyCount, storyIndex, timeProgress)
+        VpStoriesProgressIndicator(storyCount, storyIndex, timeProgress)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -595,7 +591,7 @@ fun StoriesTopBar(name: String, storyCount: Int, storyIndex: Int,timeProgress:Fl
                     }
             ) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowBack,
+                    painter = painterResource(id = R.drawable.baseline_arrow_back_24),
                     contentDescription = null
                 )
             }
@@ -618,7 +614,7 @@ fun StoriesTopBar(name: String, storyCount: Int, storyIndex: Int,timeProgress:Fl
             Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)){
                 IconButton(onClick = { expanded = true }) {
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
+                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
                         contentDescription = "Options"
                     )
                 }
@@ -644,65 +640,6 @@ fun StoriesTopBar(name: String, storyCount: Int, storyIndex: Int,timeProgress:Fl
         }
     }
 }
-@Composable
-fun StoriesProgressIndicator(storyCount: Int, storyIndex: Int, timeProgress: Float) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ){
-        repeat(storyCount){
-            index->
-            val indicatorProgress = when{
-                index < storyIndex ->1f
-                index == storyIndex -> timeProgress
-                else -> 0f
-            }
-            LinearProgressIndicator(
-                progress = indicatorProgress,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(50)),
-                color = if (isSystemInDarkTheme()) Color.White else Color.Black,
-                trackColor = Color.Gray.copy(alpha = 0.5f)
-
-            )
-
-
-//            Box(
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .height(4.dp)
-//                    .clip(RoundedCornerShape(50))
-//                    .background(Color.Gray.copy(alpha = 0.3f))
-//            ) {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxHeight()
-//                        .fillMaxWidth(indicatorProgress)
-//                        .background(if (isSystemInDarkTheme()) Color.White else Color.Black)
-//                )
-////                LinearProgressIndicator(
-////                    progress = indicatorProgress,
-////                    modifier = Modifier
-////                        .fillMaxWidth()
-////                        .height(4.dp)
-////                        .clip(RoundedCornerShape(50)),
-////                    color = if (isSystemInDarkTheme()) Color.White else Color.Black,
-////                    trackColor = Color.Gray.copy(alpha = 0.5f)
-//////                    backgroundColor = Color.Gray.copy(alpha = 0.5f),
-////
-////                )
-//            }
-
-        }
-    }
-}
-
-
 //@Composable
 //fun StoryDetailBottomBar(){
 //
