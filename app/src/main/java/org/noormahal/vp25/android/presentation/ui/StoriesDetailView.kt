@@ -21,9 +21,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -31,10 +29,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,26 +36,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
-import org.noormahal.vp25.android.R
-import org.noormahal.vp25.android.components.VpStoriesProgressIndicator
+import org.noormahal.vp25.android.components.StoriesTopBar
 import org.noormahal.vp25.android.data.Story
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
@@ -366,12 +354,14 @@ fun StoriesDetailPage(
     Scaffold(
         topBar = {
             StoriesTopBar(
-            user.userName,
-            storiesState.storiesList.size,
-            storyPagerState.currentPage,
-            timeProgress = progress.value
-        ){
-                navController.navigateUp() }
+                username = user.userName,
+                timePosted = "Yesterday, 10:45 pm",
+                storyCount = storiesState.storiesList.size,
+                storyIndex = storyPagerState.currentPage,
+                timeProgress = progress.value
+            ) {
+                navController.navigateUp()
+            }
          },
         contentWindowInsets = WindowInsets(0.dp)
     ) { paddingValues ->
@@ -566,80 +556,6 @@ fun StoriesPager(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun StoriesTopBar(name: String, storyCount: Int, storyIndex: Int,timeProgress:Float, onBackNavClicked:()->Unit={}){
-    var expanded by remember { mutableStateOf(false) }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 2.dp, vertical = 4.dp)
-//            .windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility)
-    ){
-//        Spacer(modifier = Modifier.height(4.dp))
-        VpStoriesProgressIndicator(storyCount, storyIndex, timeProgress)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {
-                        /*TODO the back button shouldn't go to previous story but to the storieslist screen or wherever they opened the stories detail from*/
-                    onBackNavClicked()
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                    contentDescription = null
-                )
-            }
-            Column(modifier = Modifier
-                .weight(1f)
-            ){
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.heightIn(max = 30.dp),
-                    overflow = TextOverflow.Ellipsis
-                )
-                Row {
-                    Text(text = "Yesterday", style = MaterialTheme.typography.labelSmall)
-                    Text(text = ", ", style = MaterialTheme.typography.labelSmall)
-                    Text(text = "10:45 pm", style = MaterialTheme.typography.labelSmall)
-                }
-            }
-
-            Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)){
-                IconButton(onClick = { expanded = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
-                        contentDescription = "Options"
-                    )
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Report") },
-                        onClick = { /* TODO: handle report */ }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Mute") },
-                        onClick = { /* TODO: handle mute */ }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Block") },
-                        onClick = { /* TODO: handle block */ }
-                    )
-                }
-            }
-
-        }
-    }
-}
 //@Composable
 //fun StoryDetailBottomBar(){
 //
@@ -743,12 +659,4 @@ fun ShimmerStory(paddingValues: PaddingValues) {
         Spacer(modifier = Modifier.height(24.dp))
         Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
     }
-}
-
-
-
-@Preview
-@Composable
-fun topbarPreview(){
-    StoriesTopBar(name = "Sajidha Abdulla", storyCount = 5, storyIndex =3 , timeProgress = 0.2f)
 }
