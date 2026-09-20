@@ -2,15 +2,6 @@ package org.noormahal.vp25.android.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625B71)
-val Pink40 = Color(0xFF7D5260)
-
-
 val White = Color(0xFFffffff)
 val OrangeWhite = Color(0xFFfffdfa)
 val OrangeLight = Color(0xfffcf7ed)
@@ -22,6 +13,8 @@ val Orange700 = Color(0xfff57c00)
 
 val Grey300 = Color(0xffe0e0e0)
 val GreyA400 = Color(0xFFbdbdbd)
+val GreyA500 = Color(0xFF9e9e9e)
+val GreyA600 = Color(0xFF757575)
 val GreyA700 = Color(0xFF616161)
 
 val OrangeBlack900 = Color(0xFF12100E)
