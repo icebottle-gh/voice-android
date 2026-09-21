@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +42,7 @@ data class InboxItemSummary(
 @Composable
 fun InboxListItem(
     item: InboxItemSummary,
+    selected: Boolean = false,
     onClick: () -> Unit = {}
 ) {
     Card(
@@ -48,6 +50,7 @@ fun InboxListItem(
             .fillMaxWidth()
             .height(76.dp)
             .clickable(onClick = onClick),
+        shape = RectangleShape,
         elevation = CardDefaults.cardElevation(0.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -57,6 +60,7 @@ fun InboxListItem(
         Row(
             modifier = Modifier
                 .fillMaxSize()
+                .selectionOverlay(selected)
                 .padding(horizontal = VpSpacing.screenHorizontal),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -156,6 +160,16 @@ fun InboxListItemPreview() {
                         type = InboxItemType.OUTGOING,
                         messageStatus = MessageStatus.ERROR
                     )
+                )
+                InboxListItem(
+                    item = InboxItemSummary(
+                        personName = "Person Name",
+                        lastMessage = "Last message",
+                        time = "Time",
+                        type = InboxItemType.INCOMING,
+                        unreadCount = 36
+                    ),
+                    selected = true
                 )
             }
         }
