@@ -1,13 +1,14 @@
 package org.noormahal.vp25.android.components
 
+import android.content.res.Configuration
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -15,102 +16,131 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
+import org.noormahal.vp25.android.theme.VpSpacing
+import org.noormahal.vp25.android.theme.VpTheme
 
 @Composable
-fun PersonListItem(props: PersonListItemProps, onFollowClick: () -> Unit = {}) {
-    val displayName = if (props.nickName != null) "[ ${props.nickName} ]" else props.fullName
+fun PersonListItem(
+    name: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    onClick: (() -> Unit)? = null,
+    trailingContent: @Composable () -> Unit = {}
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp), // Overall padding for the item
-        verticalAlignment = Alignment.CenterVertically, // Align items vertically in the center of the row
-        horizontalArrangement = Arrangement.SpaceBetween // Pushes text to left and button to right
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = VpSpacing.screenHorizontal, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Column for Full Name and Subtext
-        Column(
-            modifier = Modifier
-                .weight(1f) // Text column takes available space, pushing button to the end
-                .padding(end = 8.dp) // Add some space between text and button
-        ) {
+        Column(modifier = Modifier.weight(1f, fill = false)) {
             Text(
-                text = displayName,
-                style = MaterialTheme.typography.titleMedium, // Or titleSmall, bodyLarge
-                fontWeight = FontWeight.Bold // Make full name stand out
+                text = name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(2.dp)) // Small space between fullName and subtext
-            if (props.isFollower)
+            if (subtitle != null) {
                 Text(
-                    text = "Follows you",
-                    style = MaterialTheme.typography.bodySmall, // Smaller font style for subtext
-                    color = MaterialTheme.colorScheme.onSurfaceVariant // Slightly muted color
-                    // You can also use explicit font size:
-                    // fontSize = 12.sp,
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+            }
         }
-
-        val a = run { 20 + 10 }
-
-
-        Button(
-            onClick = onFollowClick,
-            // Optional: Adjust button padding if needed, but default usually works well
-            // contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            val label = if (props.isFollowing) "Unfollow" else "Follow"
-            Text(text = label)
-        }
+        Spacer(modifier = Modifier.width(8.dp))
+        trailingContent()
     }
 }
 
-
-// Preview for the Composable
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun PersonListItemUnfollowPreview() {
-    val props = PersonListItemProps(
-        id = "1",
-        fullName = "John Doe",
-        nickName = "Johnny",
-        isFollowing = true,
-        isFollower = true
-    )
-    MaterialTheme { // Wrap in MaterialTheme for proper styling in preview
-        Surface {
-            PersonListItem(
-                props = props
-            )
+fun PersonListItemPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column {
+                // People & Contacts
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Follows you",
+                    trailingContent = {
+                        FollowStatusButton(status = FollowStatus.FOLLOW, onFollow = {}, onUnfollow = {})
+                    }
+                )
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Follows you",
+                    trailingContent = {
+                        FollowStatusButton(status = FollowStatus.FOLLOWING, onFollow = {}, onUnfollow = {})
+                    }
+                )
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Follows you",
+                    trailingContent = {
+                        FollowStatusButton(status = FollowStatus.REQUESTED, onFollow = {}, onUnfollow = {}, onCancelRequest = {})
+                    }
+                )
+
+                // Contacts
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Phone Number",
+                    trailingContent = {
+                        VpButton(label = { Text("Invite") }, onClick = {}, style = ButtonStyle.PRIMARY_FRAMELESS)
+                    }
+                )
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Phone Number",
+                    trailingContent = {
+                        VpButton(label = { Text("Invited") }, onClick = {}, style = ButtonStyle.PRIMARY_FRAMELESS, enabled = false)
+                    }
+                )
+
+                // Selectable
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Text",
+                    onClick = {},
+                    trailingContent = {
+                        VpRadioButton(selected = false, onClick = {})
+                    }
+                )
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Text",
+                    onClick = {},
+                    trailingContent = {
+                        VpRadioButton(selected = true, onClick = {})
+                    }
+                )
+
+                // Group Members — no notes given for this variant's trailing control;
+                // assumed to be a plain row with no action until specified otherwise.
+                PersonListItem(name = "Person Name")
+
+                // Follow Requests
+                PersonListItem(
+                    name = "Person Name",
+                    trailingContent = {
+                        Row {
+                            VpButton(label = { Text("Accept") }, onClick = {}, style = ButtonStyle.ROUND_PRIMARY)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            VpButton(label = { Text("Decline") }, onClick = {}, style = ButtonStyle.ROUND_SECONDARY)
+                        }
+                    }
+                )
+            }
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PersonListItemFollowPreview() {
-    val props = PersonListItemProps(
-        id = "1",
-        fullName = "John Doe",
-        nickName = null,
-        isFollowing = false,
-        isFollower = false
-    )
-    MaterialTheme { // Wrap in MaterialTheme for proper styling in preview
-        Surface {
-            PersonListItem(
-                props = props
-            )
-        }
-    }
-}
-
-
-
-data class PersonListItemProps(
-    val id: String,
-    val fullName: String,
-    val nickName: String?,
-    val isFollowing: Boolean,
-    val isFollower: Boolean
-)
