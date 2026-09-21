@@ -26,8 +26,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.presentation.ui.LoginInfo
+import org.noormahal.vp25.android.theme.VpTheme
 
 @Composable
 fun Login(
@@ -160,78 +162,90 @@ fun Login(
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun LoginPhonePreview() {
-    Login(
-        otpSent = false,
-        isEmail = false,
-        onCountryCodeChange = {},
-        loginInfo = LoginInfo("", "", "", ""),
-        onPhoneChange = {},
-        onEmailChange = {},
-        onSendOTP = {},
-        onOtpChange = {},
-        onChangeNumber = {},
-        onChangeEmail = {},
-        onResendOTP = {},
-        onSubmit = {}
-    )
+    VpTheme {
+        Login(
+            otpSent = false,
+            isEmail = false,
+            onCountryCodeChange = {},
+            loginInfo = LoginInfo("", "", "", ""),
+            onPhoneChange = {},
+            onEmailChange = {},
+            onSendOTP = {},
+            onOtpChange = {},
+            onChangeNumber = {},
+            onChangeEmail = {},
+            onResendOTP = {},
+            onSubmit = {}
+        )
+    }
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun LoginEmailPreview() {
-    Login(
-        otpSent = false,
-        isEmail = true,
-        loginInfo = LoginInfo("", "", "", ""),
-        onCountryCodeChange = {},
-        onPhoneChange = {},
-        onEmailChange = {},
-        onSendOTP = {},
-        onOtpChange = {},
-        onChangeNumber = {},
-        onChangeEmail = {},
-        onResendOTP = {},
-        onSubmit = {}
-    )
+    VpTheme {
+        Login(
+            otpSent = false,
+            isEmail = true,
+            loginInfo = LoginInfo("", "", "", ""),
+            onCountryCodeChange = {},
+            onPhoneChange = {},
+            onEmailChange = {},
+            onSendOTP = {},
+            onOtpChange = {},
+            onChangeNumber = {},
+            onChangeEmail = {},
+            onResendOTP = {},
+            onSubmit = {}
+        )
+    }
 }
 
 @Composable
-@Preview(showBackground = true, apiLevel = 34)
+@Preview(name = "Light", showBackground = true, apiLevel = 34)
+@Preview(name = "Dark", showBackground = true, apiLevel = 34, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun LoginOtpPreview() {
-    Login(
-        otpSent = true,
-        isEmail = false,
-        loginInfo = LoginInfo("+91", "9876543210", "", "1234"),
-        onCountryCodeChange = {},
-        onPhoneChange = {},
-        onEmailChange = {},
-        onSendOTP = {},
-        onOtpChange = {},
-        onChangeNumber = {},
-        onChangeEmail = {},
-        onResendOTP = {},
-        onSubmit = {}
-    )
+    VpTheme {
+        Login(
+            otpSent = true,
+            isEmail = false,
+            loginInfo = LoginInfo("+91", "9876543210", "", "1234"),
+            onCountryCodeChange = {},
+            onPhoneChange = {},
+            onEmailChange = {},
+            onSendOTP = {},
+            onOtpChange = {},
+            onChangeNumber = {},
+            onChangeEmail = {},
+            onResendOTP = {},
+            onSubmit = {}
+        )
+    }
 }
 
 @Composable
-@Preview(showBackground = true, apiLevel = 34)
+@Preview(name = "Light", showBackground = true, apiLevel = 34)
+@Preview(name = "Dark", showBackground = true, apiLevel = 34, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun LoginOtpErrorPreview() {
-    Login(
-        otpSent = true,
-        isEmail = false,
-        loginInfo = LoginInfo("+91", "9876543210", "", "123456"),
-        onCountryCodeChange = {},
-        onPhoneChange = {},
-        onEmailChange = {},
-        onSendOTP = {},
-        onOtpChange = {},
-        onChangeNumber = {},
-        onChangeEmail = {},
-        onResendOTP = {},
-        errorMessage = "OTP is incorrect",
-        onSubmit = {}
-    )
+    VpTheme {
+        Login(
+            otpSent = true,
+            isEmail = false,
+            loginInfo = LoginInfo("+91", "9876543210", "", "123456"),
+            onCountryCodeChange = {},
+            onPhoneChange = {},
+            onEmailChange = {},
+            onSendOTP = {},
+            onOtpChange = {},
+            onChangeNumber = {},
+            onChangeEmail = {},
+            onResendOTP = {},
+            errorMessage = "OTP is incorrect",
+            onSubmit = {}
+        )
+    }
 }

@@ -1,5 +1,6 @@
 package org.noormahal.vp25.android.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -173,7 +174,8 @@ fun AccountSetup(
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun AccountSetupEmptyPreview() {
     VpTheme {
         AccountSetup(
@@ -192,7 +194,8 @@ fun AccountSetupEmptyPreview() {
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun AccountSetupFilledPreview() {
     VpTheme {
         AccountSetup(
@@ -211,7 +214,8 @@ fun AccountSetupFilledPreview() {
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun AccountSetupErrorPreview() {
     VpTheme {
         AccountSetup(
