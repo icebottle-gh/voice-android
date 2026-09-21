@@ -1,12 +1,13 @@
 package org.noormahal.vp25.android.presentation.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,36 +22,17 @@ fun AppNavGraph(
     loginviewModel: LoginViewModel = viewModel()
 ) {
     val navController = rememberNavController()
-    val context = LocalContext.current
     val isLoggedIn by loginviewModel.isLoggedIn.collectAsState()
+    val isLoadingSession by loginviewModel.isLoadingSession.collectAsState()
 
-    var splashComplete by remember { mutableStateOf(false) }
+    if (isLoadingSession) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
 
-    val startDestination = "login"
-//    val startDestination = if (isLoggedIn) "home" else "login"
-
-//    LaunchedEffect(Unit) {
-//        // Auto login check
-//        AuthPrefs.getToken(context).collect { token ->
-//            if (!token.isNullOrEmpty()) {
-//                Client.token = token
-//                loginViewModel.setLoggedIn(true)
-//                navController.navigate("home") {
-//                    popUpTo("splash") { inclusive = true }
-//                }
-//            } else {
-//                navController.navigate("login") {
-//                    popUpTo("splash") { inclusive = true }
-//                }
-//            }
-//            splashComplete = true
-//        }
-//    }
-
-    NavHost(navController = navController, startDestination = startDestination) {
-//        composable("splash") {
-//            SplashView()
-//        }
+    NavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "login") {
         composable("login") {
             LoginView (
                 onLoginSuccess = {
