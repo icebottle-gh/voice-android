@@ -8,22 +8,29 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.components.FabStyle
 import org.noormahal.vp25.android.components.VpBottomBar
+import org.noormahal.vp25.android.components.VpDrawerItem
 import org.noormahal.vp25.android.components.VpFab
+import org.noormahal.vp25.android.components.VpNavigationDrawer
 import org.noormahal.vp25.android.components.VpTopAppBar
 import org.noormahal.vp25.android.components.VpTopAppBarAction
 import org.noormahal.vp25.android.presentation.navigation.HomeNavGraph
@@ -31,39 +38,47 @@ import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.navigation.allScreens
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 import org.noormahal.vp25.android.presentation.navigation.screensWithTopBar
+import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
 import org.noormahal.vp25.android.theme.VpTheme
 
 
 @Composable
-fun HomeView() {
+fun HomeView(loginViewModel: LoginViewModel = viewModel()) {
 
-//    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val drawerScope = rememberCoroutineScope()
 
-    // Allow us to find out on which view we currently are
+
     val controller: NavController = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // currentScreen is fully derived from currentRoute - the NavController back stack
-    // is the single source of truth, so this never needs manual syncing.
     val currentScreen = remember(currentRoute) {
         allScreens.find { it.route == currentRoute } ?: Screen.BottomScreen.Stories
     }
 
-    HomeScreen(
-        currentScreen = currentScreen,
-        currentRoute = currentRoute,
-        onBottomScreenClick = { screen ->
-            controller.navigate(screen.route) {
-                popUpTo(controller.graph.findStartDestination().id) {
-                    saveState = true
+    VpNavigationDrawer(
+        drawerState = drawerState,
+        items = listOf(
+            VpDrawerItem(label = "Logout", onClick = { loginViewModel.logout() })
+        )
+    ) {
+        HomeScreen(
+            currentScreen = currentScreen,
+            currentRoute = currentRoute,
+            onBottomScreenClick = { screen ->
+                controller.navigate(screen.route) {
+                    popUpTo(controller.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-                launchSingleTop = true
-                restoreState = true
-            }
+            },
+            onOpenDrawer = { drawerScope.launch { drawerState.open() } }
+        ) { pd ->
+            HomeNavGraph(navController = controller, pd = pd)
         }
-    ) { pd ->
-        HomeNavGraph(navController = controller, pd = pd)
     }
 }
 
@@ -72,6 +87,7 @@ private fun HomeScreen(
     currentScreen: Screen,
     currentRoute: String?,
     onBottomScreenClick: (Screen) -> Unit,
+    onOpenDrawer: () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
@@ -114,10 +130,7 @@ private fun HomeScreen(
                     showLeadingIcon = currentScreen == Screen.BottomScreen.Stories,
                     leadingIcon = Icons.Default.AccountCircle,
                     leadingIconContentDescription = "Menu",
-                    onLeadingIconClick = {
-                        //Open the drawer - its a suspend function remember
-                        //TODO: side drawer
-                    },
+                    onLeadingIconClick = onOpenDrawer,
                     actions = listOf(
                         VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
                         VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),

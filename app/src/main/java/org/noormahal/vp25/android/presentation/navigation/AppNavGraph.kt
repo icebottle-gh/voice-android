@@ -4,8 +4,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,13 +36,24 @@ fun AppNavGraph(
         return
     }
 
+    var hasHandledInitialRouting by remember { mutableStateOf(false) }
+    LaunchedEffect(isLoggedIn) {
+        if (hasHandledInitialRouting && !isLoggedIn) {
+            navController.navigate("login") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+        hasHandledInitialRouting = true
+    }
+
     NavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "login") {
         composable("login") {
             LoginView (
-                onLoginSuccess = {
-                    loginviewModel.setLoggedIn(true)
-                    navController.navigate("account_setup") {
-                        popUpTo("login") { inclusive = true }
+                onLoginSuccess = { needsAccountSetup ->
+                    navController.navigate(if (needsAccountSetup) "account_setup" else "home") {
+                        popUpTo("login") {
+                            inclusive = true
+                        }
                     }
                 },
                 loginviewModel
@@ -46,7 +61,7 @@ fun AppNavGraph(
         }
 
         composable("home") {
-            HomeView()
+            HomeView(loginViewModel = loginviewModel)
         }
 
         composable("account_setup"){

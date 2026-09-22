@@ -12,7 +12,7 @@ import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
 
 
 @Composable
-fun LoginView(onLoginSuccess: () -> Unit, loginViewModel: LoginViewModel = viewModel()) {
+fun LoginView(onLoginSuccess: (needsAccountSetup: Boolean) -> Unit, loginViewModel: LoginViewModel = viewModel()) {
     val peekedOtp by loginViewModel.otp
     val loginError by loginViewModel.loginError
     var mobile by remember {

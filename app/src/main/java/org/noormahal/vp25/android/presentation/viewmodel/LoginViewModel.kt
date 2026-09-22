@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.noormahal.ib.vakkic.AppImpl
 import org.noormahal.ib.vakkic.UserImpl
+import org.noormahal.ib.vakkic.enums.AccountState
 
 class LoginViewModel(application: Application): AndroidViewModel(application) {
     private val _isLoggedIn = MutableStateFlow(false) // Replace with actual login check
@@ -52,22 +53,38 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    fun login(mobile: String, otp: String, onSuccess: () -> Unit) {
+    fun login(mobile: String, otp: String, onSuccess: (needsAccountSetup: Boolean) -> Unit) {
         _loginError.value = null
         viewModelScope.launch {
             try {
-                val loggedInUser = withContext(Dispatchers.IO) {
+                val needsAccountSetup = withContext(Dispatchers.IO) {
                     val user = Client.app.login(mobile, otp)
                     appSecretDao.setSecret(user.serialize())
-                    user
+                    Client.user = user
+                    val details = try {
+                        user.account().getDetails()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+                    details == null || AccountState.fromSerialized(details.accountState) == AccountState.SETUP
                 }
-                Client.user = loggedInUser
                 setLoggedIn(true)
-                onSuccess()
+                onSuccess(needsAccountSetup)
             } catch (e: Exception) {
                 e.printStackTrace()
                 _loginError.value = e.message ?: "Something went wrong. Please try again."
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                appSecretDao.clearSecret()
+            }
+            Client.user = null
+            setLoggedIn(false)
         }
     }
 
