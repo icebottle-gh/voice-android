@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DrawerValue
@@ -87,7 +88,8 @@ fun HomeView(
                     restoreState = true
                 }
             },
-            onOpenDrawer = { drawerScope.launch { drawerState.open() } }
+            onOpenDrawer = { drawerScope.launch { drawerState.open() } },
+            onBack = { controller.popBackStack() }
         ) { pd ->
             HomeNavGraph(navController = controller, pd = pd)
         }
@@ -100,6 +102,7 @@ private fun HomeScreen(
     currentRoute: String?,
     onBottomScreenClick: (Screen) -> Unit,
     onOpenDrawer: () -> Unit = {},
+    onBack: () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
     val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
@@ -137,13 +140,14 @@ private fun HomeScreen(
         topBar = {
             //so as to control visibility based on diff situations BACK OR DRAWER
             if (currentScreen in screensWithTopBar) {
+                val isPersonProfile = currentScreen == Screen.PersonProfile
                 VpTopAppBar(
                     title = title,
-                    showLeadingIcon = currentScreen == Screen.BottomScreen.Stories,
-                    leadingIcon = Icons.Default.AccountCircle,
-                    leadingIconContentDescription = "Menu",
-                    onLeadingIconClick = onOpenDrawer,
-                    actions = listOf(
+                    showLeadingIcon = currentScreen == Screen.BottomScreen.Stories || isPersonProfile,
+                    leadingIcon = if (isPersonProfile) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.AccountCircle,
+                    leadingIconContentDescription = if (isPersonProfile) "Back" else "Menu",
+                    onLeadingIconClick = if (isPersonProfile) onBack else onOpenDrawer,
+                    actions = if (isPersonProfile) emptyList() else listOf(
                         VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
                         VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
                         VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),

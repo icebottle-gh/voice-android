@@ -1,5 +1,6 @@
 package org.noormahal.vp25.android.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -38,7 +39,8 @@ fun VpAvatar(
     }
 }
 
-@Preview
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun VpAvatarLargePreview() {
     VpTheme{
@@ -47,7 +49,8 @@ fun VpAvatarLargePreview() {
 
 }
 
-@Preview
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun VpAvatarSmallPreview() {
     VpTheme{

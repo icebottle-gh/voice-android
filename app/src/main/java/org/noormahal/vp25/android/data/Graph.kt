@@ -14,6 +14,8 @@ object Graph {
                 context,
                 VakkiDatabase::class.java,
                 "vakki.db"
-            ).build()
+            )
+            .fallbackToDestructiveMigration(false) // For prototyping, until real Migrations are written
+            .build()
     }
 }

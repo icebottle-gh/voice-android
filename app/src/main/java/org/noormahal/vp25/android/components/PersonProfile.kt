@@ -1,5 +1,6 @@
 package org.noormahal.vp25.android.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -120,7 +121,7 @@ fun ProfileContent(
         ) {
             VpAvatar()
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Nickname (a private label you give to someone else - not applicable to your own profile)
             if (!isOwnProfile) {
@@ -174,10 +175,9 @@ fun ProfileContent(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(4.dp))
             }
 
-            // TODO: age/gender aren't populated by the profile API yet - wire these to
-            //  profile.age / profile.gender once the backend fills them in.
             Text(
                 text = profile.fullName,
                 style = MaterialTheme.typography.titleLarge,
@@ -185,16 +185,21 @@ fun ProfileContent(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "Age: 25, Gender: Female",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
+            val ageGenderText = listOfNotNull(
+                profile.age?.takeIf { it.isNotBlank() }?.let { "Age: $it" },
+                profile.gender?.takeIf { it.isNotBlank() }?.let { "Gender: $it" }
+            ).joinToString(", ")
+            if (ageGenderText.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = ageGenderText,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
 
             // Follow/Following/Requested Button (other people's profiles only)
             if (!isOwnProfile && connectionStatus != null) {
+                Spacer(modifier = Modifier.height(20.dp))
                 // TODO: ConnectionStatus only carries isFollowing/isFollower today, so REQUESTED
                 //  can't be derived yet - wire that up once the "requested" state exists in the data layer.
                 val followStatus = if (connectionStatus.isFollowing) FollowStatus.FOLLOWING else FollowStatus.FOLLOW
@@ -217,7 +222,7 @@ fun ProfileContent(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Bio
         Column(
@@ -250,7 +255,7 @@ fun ProfileContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         // Groups (own profile only)
         if (isOwnProfile) {
@@ -337,7 +342,8 @@ fun EditNicknameDialog(
     )
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PersonProfilePreview() {
     VpTheme {
@@ -356,7 +362,8 @@ fun PersonProfilePreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PersonProfileLongBioPreview() {
     VpTheme {
@@ -380,7 +387,8 @@ fun PersonProfileLongBioPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun OwnPersonProfilePreview() {
     VpTheme {
@@ -403,7 +411,8 @@ fun OwnPersonProfilePreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun OwnPersonProfileNoBioPreview() {
     VpTheme {

@@ -7,13 +7,17 @@ fun makePersonalizedProfile(
     id: String,
     fullName: String,
     nickName: String?,
-    bio: String?
+    bio: String?,
+    age: String? = null,
+    gender: String? = null
 ): PersonalizedProfile {
     val profile = PersonalizedProfile()
     profile.id = id
     profile.fullName = fullName
     profile.nickName = nickName
     profile.bio = bio
+    profile.age = age
+    profile.gender = gender
     return profile
 }
 

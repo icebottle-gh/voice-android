@@ -28,8 +28,8 @@ private val DarkColorScheme = darkColorScheme(
     surface =  OrangeBlack800,
     onSurface = White,
 
-    primaryContainer = OrangeA200,
-    onPrimaryContainer = OrangeWhite,
+    primaryContainer = Orange100,
+    onPrimaryContainer = Orange100,
     secondaryContainer = OrangeBrown,
     onSecondaryContainer = White,
 

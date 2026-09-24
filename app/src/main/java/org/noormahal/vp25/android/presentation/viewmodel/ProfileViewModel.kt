@@ -5,18 +5,23 @@ import androidx.lifecycle.viewModelScope
 import org.noormahal.vp25.android.common.Client // Assuming your API client
 import org.noormahal.vp25.android.common.makePersonalizedProfile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.noormahal.ib.vakkic.dto.PersonalizedProfile // Your DTO
+import java.util.Calendar
 
 // Data class to hold all profile screen state
 data class ProfileScreenUiState(
     val profile: PersonalizedProfile? = null,
     val nickname: String? = null, // Store nickname separately if not part of PersonalizedProfile
     val isFollowing: Boolean = false,
+    val isFollower: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
     val isOwnProfile: Boolean = false // To show/hide edit icon
@@ -27,26 +32,37 @@ class ProfileViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileScreenUiState())
     val uiState: StateFlow<ProfileScreenUiState> = _uiState.asStateFlow()
 
-    // Replace with your actual logic to get the current logged-in user's ID
-    private val currentLoggedInUserId = "currentUserStaticId" // Placeholder
+    private val _followActionError = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val followActionError: SharedFlow<String> = _followActionError.asSharedFlow()
 
     fun fetchOwnProfile() {
-        // TODO: no "own profile" endpoint wired up yet - currentLoggedInUserId is a
-        //  placeholder the backend doesn't know, so fetchUserProfile would 404. Fill in
-        //  dummy data instead until that's ready.
-        _uiState.update {
-            it.copy(
-                profile = makePersonalizedProfile(
-                    id = currentLoggedInUserId,
-                    fullName = "John Doe",
-                    nickName = null,
-                    bio = "I develop android apps using kotlin and jetpack compose"
-                ),
-                nickname = null,
-                isFollowing = false,
-                isLoading = false,
-                isOwnProfile = true
-            )
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val details = Client.user!!.account().getDetails()
+                val yearOfBirth = details.yearOfBirth?.toIntOrNull()
+                val age = yearOfBirth?.let { (Calendar.getInstance().get(Calendar.YEAR) - it).toString() }
+                _uiState.update {
+                    it.copy(
+                        profile = makePersonalizedProfile(
+                            id = details.username,
+                            fullName = details.fullName,
+                            nickName = null,
+                            bio = details.bio,
+                            age = age,
+                            gender = details.gender?.replaceFirstChar { it.uppercase() }
+                        ),
+                        nickname = null,
+                        isFollowing = false,
+                        isLoading = false,
+                        isOwnProfile = true
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Client.reportIfUnauthorized(e)
+                _uiState.update { it.copy(error = e.message ?: "Something went wrong. Please try again.", isLoading = false) }
+            }
         }
     }
 
@@ -54,27 +70,25 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                // --- Replace with your actual API calls ---
-                // 1. Fetch user profile details
-                // val fetchedProfile = apiClient.getUserProfile(userId) // Example
-                val fetchedProfile = Client.user!!.people().getProfiles(listOf(userId)).get(0) // Example using existing search
-
-                // 2. Fetch follow status
-                // val followingStatus = apiClient.getFollowStatus(currentLoggedInUserId, userId)
-                val followingStatus = Math.random() > 0.5 // Placeholder
-
-                // 3. Fetch nickname (assuming it's stored separately or you have a way to get it)
-                // val userNickname = apiClient.getNickname(userId)
-                val userNickname = if (userId == "user123") "The Legend" else null // Placeholder
-
+                val fetchedProfile = Client.user!!.people().getProfiles(listOf(userId)).firstOrNull()
                 if (fetchedProfile != null) {
+                    val ownUsername = Client.user!!.account().getDetails().username
+                    // Connection status is best-effort: a failure here (e.g. the connections
+                    // endpoint erroring out) shouldn't block the rest of the profile from showing.
+                    val connectionStatus = try {
+                        Client.user!!.connections().get().find { it.user == userId }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Client.reportIfUnauthorized(e)
+                        null
+                    }
                     _uiState.update {
                         it.copy(
                             profile = fetchedProfile,
-                            nickname = userNickname, // Set fetched nickname
-                            isFollowing = followingStatus,
+                            isFollowing = connectionStatus?.isFollowing ?: false,
+                            isFollower = connectionStatus?.isFollower ?: false,
                             isLoading = false,
-                            isOwnProfile = userId == currentLoggedInUserId
+                            isOwnProfile = userId == ownUsername
                         )
                     }
                 } else {
@@ -100,6 +114,8 @@ class ProfileViewModel : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 Client.reportIfUnauthorized(e)
+                val action = if (newFollowStatus) "follow" else "unfollow"
+                _followActionError.tryEmit(e.message?.let { "Couldn't $action: $it" } ?: "Couldn't $action. Please try again.")
             }
         }
     }
