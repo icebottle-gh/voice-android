@@ -43,9 +43,14 @@ class FindScreenViewModel(application: Application): AndroidViewModel(applicatio
                     }
                 }
                 .collectLatest { query ->
-
-                    _searchResults.value = Client.user!!.people().search(query, _typing.value)
-                    _loading.value = false
+                    try {
+                        _searchResults.value = Client.user!!.people().search(query, _typing.value)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Client.reportIfUnauthorized(e)
+                    } finally {
+                        _loading.value = false
+                    }
                 }
         }
 
@@ -53,8 +58,14 @@ class FindScreenViewModel(application: Application): AndroidViewModel(applicatio
             _typing.collectLatest { typing ->
                 if (!typing) {
                     _loading.value = true
-                    _searchResults.value = Client.user!!.people().search(_searchString.value, _typing.value)
-                    _loading.value = false
+                    try {
+                        _searchResults.value = Client.user!!.people().search(_searchString.value, _typing.value)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Client.reportIfUnauthorized(e)
+                    } finally {
+                        _loading.value = false
+                    }
                 }
             }
         }

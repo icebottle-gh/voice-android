@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import org.noormahal.vp25.android.common.Client
-import org.noormahal.vp25.android.data.AppSecretDao
-import org.noormahal.vp25.android.data.VakkiDatabase
+import org.noormahal.vp25.android.data.EncryptedSecretStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.noormahal.ib.vakkic.AppImpl
@@ -22,7 +22,7 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
     private val _isLoadingSession = MutableStateFlow(true)
     val isLoadingSession: StateFlow<Boolean> = _isLoadingSession
-    private val appSecretDao: AppSecretDao = VakkiDatabase.getDatabase(application).appSecretDao()
+    private val secretStore: EncryptedSecretStore = EncryptedSecretStore(application)
 
     private val _otp = mutableStateOf("")
     val otp: State<String> = _otp
@@ -37,6 +37,11 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
 
     init {
         wake()
+        viewModelScope.launch {
+            Client.sessionExpired.collect {
+                logout()
+            }
+        }
     }
 
     fun requestOtp(mobile: String) {
@@ -59,7 +64,7 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
             try {
                 val needsAccountSetup = withContext(Dispatchers.IO) {
                     val user = Client.app.login(mobile, otp)
-                    appSecretDao.setSecret(user.serialize())
+                    secretStore.setSecret(user.serialize())
                     Client.user = user
                     val details = try {
                         user.account().getDetails()
@@ -81,7 +86,7 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
     fun logout() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                appSecretDao.clearSecret()
+                secretStore.clearSecret()
             }
             Client.user = null
             setLoggedIn(false)
@@ -91,10 +96,17 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
     private fun wake() {
         viewModelScope.launch(Dispatchers.IO) {
             if (Client.user == null) {
-                val secret = appSecretDao.getSecret()?.secretValue
-                if (secret != null) {
-                    Client.user = UserImpl.deserialize(secret, Client.app as AppImpl?)
-                    setLoggedIn(true)
+                try {
+                    val secret = secretStore.getSecret()
+                    if (secret != null) {
+                        Client.user = UserImpl.deserialize(secret, Client.app as AppImpl?)
+                        setLoggedIn(true)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    secretStore.clearSecret()
+                    Client.user = null
+                    setLoggedIn(false)
                 }
             }
             setLoadingSession(false)

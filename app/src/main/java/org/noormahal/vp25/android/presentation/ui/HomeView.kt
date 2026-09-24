@@ -12,6 +12,8 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,14 +41,23 @@ import org.noormahal.vp25.android.presentation.navigation.allScreens
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 import org.noormahal.vp25.android.presentation.navigation.screensWithTopBar
 import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
+import org.noormahal.vp25.android.presentation.viewmodel.ProfileViewModel
 import org.noormahal.vp25.android.theme.VpTheme
 
 
 @Composable
-fun HomeView(loginViewModel: LoginViewModel = viewModel()) {
+fun HomeView(
+    loginViewModel: LoginViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel()
+) {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val drawerScope = rememberCoroutineScope()
+
+    val profileUiState by profileViewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchOwnProfile()
+    }
 
 
     val controller: NavController = rememberNavController()
@@ -61,7 +72,8 @@ fun HomeView(loginViewModel: LoginViewModel = viewModel()) {
         drawerState = drawerState,
         items = listOf(
             VpDrawerItem(label = "Logout", onClick = { loginViewModel.logout() })
-        )
+        ),
+        userName = profileUiState.profile?.fullName
     ) {
         HomeScreen(
             currentScreen = currentScreen,

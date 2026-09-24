@@ -83,6 +83,7 @@ class ProfileViewModel : ViewModel() {
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Error fetching profile: ${e.message}", isLoading = false) }
                 e.printStackTrace()
+                Client.reportIfUnauthorized(e)
             }
         }
     }
@@ -91,10 +92,15 @@ class ProfileViewModel : ViewModel() {
         val currentProfileId = _uiState.value.profile?.id ?: return
         val newFollowStatus = !_uiState.value.isFollowing
         viewModelScope.launch(Dispatchers.IO) {
-            // --- Replace with your actual API call to follow/unfollow ---
-            val connectionStatus = if (newFollowStatus) Client.user!!.connections().follow(currentProfileId) else Client.user!!.connections().unfollow(currentProfileId)
-            // val success = apiClient.setFollowStatus(currentLoggedInUserId, currentProfileId, newFollowStatus)
-            _uiState.update { it.copy(isFollowing = newFollowStatus) }
+            try {
+                // --- Replace with your actual API call to follow/unfollow ---
+                if (newFollowStatus) Client.user!!.connections().follow(currentProfileId) else Client.user!!.connections().unfollow(currentProfileId)
+                // val success = apiClient.setFollowStatus(currentLoggedInUserId, currentProfileId, newFollowStatus)
+                _uiState.update { it.copy(isFollowing = newFollowStatus) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Client.reportIfUnauthorized(e)
+            }
         }
     }
 

@@ -35,6 +35,7 @@ class AccountSetupViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                Client.reportIfUnauthorized(e)
                 _error.value = e.message ?: "Something went wrong. Please try again."
             } finally {
                 _isLoading.value = false
@@ -53,6 +54,7 @@ class AccountSetupViewModel : ViewModel() {
                 onSuccess()
             } catch (e: Exception) {
                 e.printStackTrace()
+                Client.reportIfUnauthorized(e)
                 _error.value = e.message ?: "Something went wrong. Please try again."
             } finally {
                 _isSubmitting.value = false
