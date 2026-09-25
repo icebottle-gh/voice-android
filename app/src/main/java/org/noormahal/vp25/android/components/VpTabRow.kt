@@ -61,8 +61,8 @@ fun VpTab(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
             color = textColor
         )
         Spacer(modifier = Modifier.height(8.dp))

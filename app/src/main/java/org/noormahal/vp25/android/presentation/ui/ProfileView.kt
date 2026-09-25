@@ -15,9 +15,16 @@ import org.noormahal.vp25.android.presentation.viewmodel.ProfileViewModel
 @Composable
 fun OwnProfileView(viewModel: ProfileViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.fetchOwnProfile()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.actionError.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     PersonProfile(
@@ -32,7 +39,8 @@ fun OwnProfileView(viewModel: ProfileViewModel = viewModel()) {
         ),
         onFollow = {},
         onUnfollow = {},
-        onNickNameChange = { viewModel.updateUserNickname(it) }
+        onNickNameChange = { viewModel.updateUserNickname(it) },
+        onBioChange = { viewModel.updateOwnBio(it) }
     )
 }
 
@@ -46,7 +54,7 @@ fun PersonProfileView(userId: String, viewModel: ProfileViewModel = viewModel())
     }
 
     LaunchedEffect(Unit) {
-        viewModel.followActionError.collect { message ->
+        viewModel.actionError.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }

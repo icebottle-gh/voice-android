@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import org.noormahal.vp25.android.common.Client // Assuming your API client
 import org.noormahal.vp25.android.common.makePersonalizedProfile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -13,8 +14,22 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.noormahal.ib.vakkic.dto.AccountInformation
 import org.noormahal.ib.vakkic.dto.PersonalizedProfile // Your DTO
 import java.util.Calendar
+
+private fun AccountInformation.toPersonalizedProfile(): PersonalizedProfile {
+    val yearOfBirth = yearOfBirth?.toIntOrNull()
+    val age = yearOfBirth?.let { (Calendar.getInstance().get(Calendar.YEAR) - it).toString() }
+    return makePersonalizedProfile(
+        id = username,
+        fullName = fullName,
+        nickName = null,
+        bio = bio,
+        age = age,
+        gender = gender?.replaceFirstChar { it.uppercase() }
+    )
+}
 
 // Data class to hold all profile screen state
 data class ProfileScreenUiState(
@@ -32,26 +47,17 @@ class ProfileViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileScreenUiState())
     val uiState: StateFlow<ProfileScreenUiState> = _uiState.asStateFlow()
 
-    private val _followActionError = MutableSharedFlow<String>(extraBufferCapacity = 1)
-    val followActionError: SharedFlow<String> = _followActionError.asSharedFlow()
+    private val _actionError = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val actionError: SharedFlow<String> = _actionError.asSharedFlow()
 
     fun fetchOwnProfile() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val details = Client.user!!.account().getDetails()
-                val yearOfBirth = details.yearOfBirth?.toIntOrNull()
-                val age = yearOfBirth?.let { (Calendar.getInstance().get(Calendar.YEAR) - it).toString() }
                 _uiState.update {
                     it.copy(
-                        profile = makePersonalizedProfile(
-                            id = details.username,
-                            fullName = details.fullName,
-                            nickName = null,
-                            bio = details.bio,
-                            age = age,
-                            gender = details.gender?.replaceFirstChar { it.uppercase() }
-                        ),
+                        profile = details.toPersonalizedProfile(),
                         nickname = null,
                         isFollowing = false,
                         isLoading = false,
@@ -70,18 +76,27 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val fetchedProfile = Client.user!!.people().getProfiles(listOf(userId)).firstOrNull()
-                if (fetchedProfile != null) {
-                    val ownUsername = Client.user!!.account().getDetails().username
-                    // Connection status is best-effort: a failure here (e.g. the connections
-                    // endpoint erroring out) shouldn't block the rest of the profile from showing.
-                    val connectionStatus = try {
+                // These three reads are independent of each other, so fetch them concurrently
+                // instead of one after another - total wait time becomes the slowest of the
+                // three rather than the sum of all three.
+                val profileDeferred = async { Client.user!!.people().getProfiles(listOf(userId)).firstOrNull() }
+                val ownUsernameDeferred = async { Client.user!!.account().getDetails().username }
+                // Connection status is best-effort: a failure here (e.g. the connections
+                // endpoint erroring out) shouldn't block the rest of the profile from showing.
+                val connectionDeferred = async {
+                    try {
                         Client.user!!.connections().get().find { it.user == userId }
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Client.reportIfUnauthorized(e)
                         null
                     }
+                }
+
+                val fetchedProfile = profileDeferred.await()
+                if (fetchedProfile != null) {
+                    val ownUsername = ownUsernameDeferred.await()
+                    val connectionStatus = connectionDeferred.await()
                     _uiState.update {
                         it.copy(
                             profile = fetchedProfile,
@@ -92,6 +107,8 @@ class ProfileViewModel : ViewModel() {
                         )
                     }
                 } else {
+                    ownUsernameDeferred.cancel()
+                    connectionDeferred.cancel()
                     _uiState.update { it.copy(error = "User not found", isLoading = false) }
                 }
             } catch (e: Exception) {
@@ -115,7 +132,21 @@ class ProfileViewModel : ViewModel() {
                 e.printStackTrace()
                 Client.reportIfUnauthorized(e)
                 val action = if (newFollowStatus) "follow" else "unfollow"
-                _followActionError.tryEmit(e.message?.let { "Couldn't $action: $it" } ?: "Couldn't $action. Please try again.")
+                _actionError.tryEmit(e.message?.let { "Couldn't $action: $it" } ?: "Couldn't $action. Please try again.")
+            }
+        }
+    }
+
+    fun updateOwnBio(newBio: String?) {
+        val currentProfile = _uiState.value.profile ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val updated = Client.user!!.account().setDetails(currentProfile.fullName, newBio.orEmpty())
+                _uiState.update { it.copy(profile = updated.toPersonalizedProfile()) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Client.reportIfUnauthorized(e)
+                _actionError.tryEmit(e.message?.let { "Couldn't update bio: $it" } ?: "Couldn't update bio. Please try again.")
             }
         }
     }

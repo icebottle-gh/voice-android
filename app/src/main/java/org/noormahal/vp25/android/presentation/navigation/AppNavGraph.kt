@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import org.noormahal.vp25.android.components.rememberDelayedLoading
 import org.noormahal.vp25.android.presentation.ui.AccountSetupView
 import org.noormahal.vp25.android.presentation.ui.HomeView
 import org.noormahal.vp25.android.presentation.ui.LoginView
@@ -29,9 +30,13 @@ fun AppNavGraph(
     val isLoggedIn by loginviewModel.isLoggedIn.collectAsState()
     val isLoadingSession by loginviewModel.isLoadingSession.collectAsState()
 
+    val showLoadingSpinner = rememberDelayedLoading(isLoadingSession)
+
     if (isLoadingSession) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+        if (showLoadingSpinner) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }
         return
     }

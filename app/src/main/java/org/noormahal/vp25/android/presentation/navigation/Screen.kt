@@ -90,7 +90,9 @@ sealed class Screen(val title: String, val route: String){
 val screensWithBottom = listOf(
     Screen.BottomScreen.Stories,
     Screen.BottomScreen.Find,
-    Screen.BottomScreen.Chats,
+    // Chats is not part of the first release - see Screen.BottomScreen.Chats and its
+    // route registration in HomeNavGraph.kt, both left in place for when it ships.
+    // Screen.BottomScreen.Chats,
     Screen.BottomScreen.Alerts,
     Screen.BottomScreen.Profile
 )
@@ -102,7 +104,7 @@ val allScreens = listOf(
 
     Screen.Login,
     Screen.BottomScreen.Stories,
-    Screen.BottomScreen.Chats,
+    // Screen.BottomScreen.Chats,
     Screen.BottomScreen.Alerts,
     Screen.BottomScreen.Find,
     Screen.BottomScreen.Profile,

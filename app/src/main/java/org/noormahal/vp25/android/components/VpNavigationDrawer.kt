@@ -42,6 +42,7 @@ fun VpNavigationDrawer(
     modifier: Modifier = Modifier,
     drawerWidth: Dp = 240.dp,
     userName: String? = null,
+    gesturesEnabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -49,6 +50,7 @@ fun VpNavigationDrawer(
     ModalNavigationDrawer(
         drawerState = drawerState,
         modifier = modifier,
+        gesturesEnabled = gesturesEnabled,
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.width(drawerWidth)) {
                 Column(

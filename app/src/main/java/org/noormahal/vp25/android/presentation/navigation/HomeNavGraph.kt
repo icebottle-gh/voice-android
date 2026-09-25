@@ -14,7 +14,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import org.noormahal.vp25.android.presentation.ui.FindScreen
+import org.noormahal.vp25.android.presentation.ui.FindView
 import org.noormahal.vp25.android.presentation.ui.OwnProfileView
 import org.noormahal.vp25.android.presentation.ui.PersonProfileView
 import org.noormahal.vp25.android.presentation.ui.StoriesDetail
@@ -45,17 +45,18 @@ fun HomeNavGraph(
         composable(Screen.BottomScreen.Stories.bottomRoute){
             StoriesList(navController,storiesViewModel)
         }
-        composable(Screen.BottomScreen.Chats.bottomRoute){
+        // Chats is not part of the first release - route unreachable since it's also
+        // removed from screensWithBottom in Screen.kt, kept here for when it ships.
+//        composable(Screen.BottomScreen.Chats.bottomRoute){
 //            ChatsInbox()
-            run {  }
-        }
+//            run {  }
+//        }
         composable(Screen.BottomScreen.Alerts.bottomRoute){
 //            Alerts()
             run {  }
         }
         composable(Screen.BottomScreen.Find.bottomRoute){
-//            FindPeople()
-            FindScreen(navController, findScreenViewModel)
+            FindView(navController, findScreenViewModel)
         }
         composable(Screen.BottomScreen.Profile.bottomRoute){
             OwnProfileView()

@@ -74,7 +74,10 @@ fun HomeView(
         items = listOf(
             VpDrawerItem(label = "Logout", onClick = { loginViewModel.logout() })
         ),
-        userName = profileUiState.profile?.fullName
+        userName = profileUiState.profile?.fullName,
+        // Swipe-to-open should only work on the Stories tab, matching where the
+        // drawer's own avatar/menu icon is shown in the top bar.
+        gesturesEnabled = currentScreen == Screen.BottomScreen.Stories
     ) {
         HomeScreen(
             currentScreen = currentScreen,

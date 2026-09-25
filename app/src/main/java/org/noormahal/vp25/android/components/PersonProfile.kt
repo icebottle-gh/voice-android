@@ -57,12 +57,16 @@ fun PersonProfile(
     broadcastsList: List<BroadcastGroupSummary> = emptyList(),
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
-    onNickNameChange: (String?) -> Unit
+    onNickNameChange: (String?) -> Unit,
+    onBioChange: (String?) -> Unit = {}
 ) {
     var showEditNicknameDialog by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxSize()) {
+    var showEditBioDialog by remember { mutableStateOf(false) }
+    val showLoadingSpinner = rememberDelayedLoading(isLoading)
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when {
-            isLoading -> {
+            showLoadingSpinner -> {
                 CircularProgressIndicator()
             }
             error != null -> {
@@ -77,7 +81,8 @@ fun PersonProfile(
                     modifier = Modifier.fillMaxSize(),
                     onFollow = onFollow,
                     onUnfollow = onUnfollow,
-                    onEditNicknameClick = { showEditNicknameDialog = true }
+                    onEditNicknameClick = { showEditNicknameDialog = true },
+                    onEditBioClick = { showEditBioDialog = true }
                 )
             }
             else -> {
@@ -96,6 +101,17 @@ fun PersonProfile(
             }
         )
     }
+
+    if (showEditBioDialog && profile != null) {
+        EditBioDialog(
+            currentBio = profile.bio,
+            onDismiss = { showEditBioDialog = false },
+            onConfirm = { newBio ->
+                onBioChange(newBio)
+                showEditBioDialog = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -107,7 +123,8 @@ fun ProfileContent(
     modifier: Modifier,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
-    onEditNicknameClick: () -> Unit
+    onEditNicknameClick: () -> Unit,
+    onEditBioClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -230,11 +247,33 @@ fun ProfileContent(
         ) {
             if (!profile.bio.isNullOrBlank()) {
                 ExpandableBioInline(bio = profile.bio)
+                if (isOwnProfile) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable(onClick = onEditBioClick)
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Edit Bio",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Edit Bio",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             } else if (isOwnProfile) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { /* TODO: Open bio edit */ }
+                        .clickable(onClick = onEditBioClick)
                         .padding(vertical = 4.dp)
                 ) {
                     Icon(
@@ -331,6 +370,41 @@ fun EditNicknameDialog(
         },
         confirmButton = {
             Button(onClick = { onConfirm(nicknameInput.takeIf { it.isNotBlank() }) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun EditBioDialog(
+    currentBio: String?,
+    onDismiss: () -> Unit,
+    onConfirm: (String?) -> Unit
+) {
+    var bioInput by remember { mutableStateOf(currentBio ?: "") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (currentBio.isNullOrBlank()) "Add Bio" else "Edit Bio") },
+        text = {
+            OutlinedTextField(
+                value = bioInput,
+                onValueChange = { bioInput = it },
+                label = { Text("Bio") },
+                placeholder = { Text("Tell people about yourself") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 6
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(bioInput.takeIf { it.isNotBlank() }) }) {
                 Text("Save")
             }
         },

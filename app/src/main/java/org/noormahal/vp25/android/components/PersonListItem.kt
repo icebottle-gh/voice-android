@@ -2,7 +2,6 @@ package org.noormahal.vp25.android.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,21 +27,25 @@ fun PersonListItem(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     onClick: (() -> Unit)? = null,
+    showAvatar: Boolean = false,
     trailingContent: @Composable () -> Unit = {}
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = VpSpacing.screenHorizontal, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(horizontal = VpSpacing.screenHorizontal, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f, fill = false)) {
+        if (showAvatar) {
+            VpAvatar(size = 40.dp)
+            Spacer(modifier = Modifier.width(12.dp))
+        }
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -68,6 +71,16 @@ fun PersonListItemPreview() {
     VpTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             Column {
+                // With leading avatar
+                PersonListItem(
+                    name = "Person Name",
+                    subtitle = "Follows you",
+                    showAvatar = true,
+                    trailingContent = {
+                        FollowStatusButton(status = FollowStatus.FOLLOW, onFollow = {}, onUnfollow = {})
+                    }
+                )
+
                 // People & Contacts
                 PersonListItem(
                     name = "Person Name",

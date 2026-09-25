@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.noormahal.ib.vakkic.enums.Gender
 import org.noormahal.vp25.android.components.AccountSetup
+import org.noormahal.vp25.android.components.rememberDelayedLoading
 import org.noormahal.vp25.android.presentation.viewmodel.AccountSetupViewModel
 
 @Composable
@@ -34,9 +35,13 @@ fun AccountSetupView(
         viewModel.loadAccountDetails(onAlreadySetUp = onSubmit)
     }
 
+    val showLoadingSpinner = rememberDelayedLoading(isLoading)
+
     if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+        if (showLoadingSpinner) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }
     } else {
         AccountSetup(
