@@ -1,7 +1,8 @@
 package org.noormahal.vp25.android.components
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
@@ -11,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,8 +56,11 @@ fun VpBottomBar(
         NavigationBar(
             containerColor = MaterialTheme.colorScheme.background,
             tonalElevation = 0.dp,
+            // Extra horizontal inset on top of the default system-bar insets, so the items
+            // sit closer together instead of spreading edge to edge - the bar's own
+            // background stays full width, only the item row is padded in.
+            windowInsets = NavigationBarDefaults.windowInsets.add(WindowInsets(left = 24.dp, right = 24.dp)),
             modifier = Modifier
-//                .padding(0.dp)
                 .drawBehind {
                 drawLine(
                     color = topOutlineColor,

@@ -1,5 +1,6 @@
 package org.noormahal.vp25.android.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,16 +53,21 @@ fun PersonProfile(
     error: String?,
     profile: PersonalizedProfile?,
     connectionStatus: ConnectionStatus?,
+    connectionLoadFailed: Boolean = false,
     isOwnProfile: Boolean,
     broadcastsList: List<BroadcastGroupSummary> = emptyList(),
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
-    onNickNameChange: (String?) -> Unit
+    onNickNameChange: (String?) -> Unit,
+    onBioChange: (String?) -> Unit = {}
 ) {
     var showEditNicknameDialog by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxSize()) {
+    var showEditBioDialog by remember { mutableStateOf(false) }
+    val showLoadingSpinner = rememberDelayedLoading(isLoading)
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when {
-            isLoading -> {
+            showLoadingSpinner -> {
                 CircularProgressIndicator()
             }
             error != null -> {
@@ -71,12 +77,14 @@ fun PersonProfile(
                 ProfileContent(
                     profile = profile,
                     connectionStatus = connectionStatus,
+                    connectionLoadFailed = connectionLoadFailed,
                     isOwnProfile = isOwnProfile,
                     broadcastsList = broadcastsList,
                     modifier = Modifier.fillMaxSize(),
                     onFollow = onFollow,
                     onUnfollow = onUnfollow,
-                    onEditNicknameClick = { showEditNicknameDialog = true }
+                    onEditNicknameClick = { showEditNicknameDialog = true },
+                    onEditBioClick = { showEditBioDialog = true }
                 )
             }
             else -> {
@@ -95,6 +103,17 @@ fun PersonProfile(
             }
         )
     }
+
+    if (showEditBioDialog && profile != null) {
+        EditBioDialog(
+            currentBio = profile.bio,
+            onDismiss = { showEditBioDialog = false },
+            onConfirm = { newBio ->
+                onBioChange(newBio)
+                showEditBioDialog = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -102,11 +121,13 @@ fun ProfileContent(
     profile: PersonalizedProfile,
     isOwnProfile: Boolean,
     connectionStatus: ConnectionStatus?,
+    connectionLoadFailed: Boolean = false,
     broadcastsList: List<BroadcastGroupSummary>,
     modifier: Modifier,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
-    onEditNicknameClick: () -> Unit
+    onEditNicknameClick: () -> Unit,
+    onEditBioClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -120,7 +141,7 @@ fun ProfileContent(
         ) {
             VpAvatar()
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Nickname (a private label you give to someone else - not applicable to your own profile)
             if (!isOwnProfile) {
@@ -174,10 +195,9 @@ fun ProfileContent(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(4.dp))
             }
 
-            // TODO: age/gender aren't populated by the profile API yet - wire these to
-            //  profile.age / profile.gender once the backend fills them in.
             Text(
                 text = profile.fullName,
                 style = MaterialTheme.typography.titleLarge,
@@ -185,16 +205,28 @@ fun ProfileContent(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "Age: 25, Gender: Female",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
+            val ageGenderText = listOfNotNull(
+                profile.age?.takeIf { it.isNotBlank() }?.let { "Age: $it" },
+                profile.gender?.takeIf { it.isNotBlank() }?.let { "Gender: $it" }
+            ).joinToString(", ")
+            if (ageGenderText.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = ageGenderText,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
 
             // Follow/Following/Requested Button (other people's profiles only)
-            if (!isOwnProfile && connectionStatus != null) {
+            if (!isOwnProfile && connectionLoadFailed) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Couldn't load connection info",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else if (!isOwnProfile && connectionStatus != null) {
+                Spacer(modifier = Modifier.height(20.dp))
                 // TODO: ConnectionStatus only carries isFollowing/isFollower today, so REQUESTED
                 //  can't be derived yet - wire that up once the "requested" state exists in the data layer.
                 val followStatus = if (connectionStatus.isFollowing) FollowStatus.FOLLOWING else FollowStatus.FOLLOW
@@ -217,7 +249,7 @@ fun ProfileContent(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Bio
         Column(
@@ -225,11 +257,33 @@ fun ProfileContent(
         ) {
             if (!profile.bio.isNullOrBlank()) {
                 ExpandableBioInline(bio = profile.bio)
+                if (isOwnProfile) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable(onClick = onEditBioClick)
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Edit Bio",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Edit Bio",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             } else if (isOwnProfile) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { /* TODO: Open bio edit */ }
+                        .clickable(onClick = onEditBioClick)
                         .padding(vertical = 4.dp)
                 ) {
                     Icon(
@@ -250,7 +304,7 @@ fun ProfileContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         // Groups (own profile only)
         if (isOwnProfile) {
@@ -337,7 +391,43 @@ fun EditNicknameDialog(
     )
 }
 
-@Preview(showBackground = true)
+@Composable
+fun EditBioDialog(
+    currentBio: String?,
+    onDismiss: () -> Unit,
+    onConfirm: (String?) -> Unit
+) {
+    var bioInput by remember { mutableStateOf(currentBio ?: "") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (currentBio.isNullOrBlank()) "Add Bio" else "Edit Bio") },
+        text = {
+            OutlinedTextField(
+                value = bioInput,
+                onValueChange = { bioInput = it },
+                label = { Text("Bio") },
+                placeholder = { Text("Tell people about yourself") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 6
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(bioInput.takeIf { it.isNotBlank() }) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PersonProfilePreview() {
     VpTheme {
@@ -356,7 +446,8 @@ fun PersonProfilePreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PersonProfileLongBioPreview() {
     VpTheme {
@@ -380,7 +471,8 @@ fun PersonProfileLongBioPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun OwnPersonProfilePreview() {
     VpTheme {
@@ -403,7 +495,8 @@ fun OwnPersonProfilePreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun OwnPersonProfileNoBioPreview() {
     VpTheme {

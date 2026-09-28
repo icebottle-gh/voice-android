@@ -6,16 +6,21 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,21 +36,25 @@ import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.navigation.allScreens
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 import org.noormahal.vp25.android.presentation.navigation.screensWithTopBar
+import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
+import org.noormahal.vp25.android.presentation.viewmodel.ProfileViewModel
 import org.noormahal.vp25.android.theme.VpTheme
 
 
 @Composable
-fun HomeView() {
+fun HomeView(
+    loginViewModel: LoginViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel()
+) {
 
-//    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchOwnProfile()
+    }
 
-    // Allow us to find out on which view we currently are
     val controller: NavController = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // currentScreen is fully derived from currentRoute - the NavController back stack
-    // is the single source of truth, so this never needs manual syncing.
     val currentScreen = remember(currentRoute) {
         allScreens.find { it.route == currentRoute } ?: Screen.BottomScreen.Stories
     }
@@ -61,7 +70,9 @@ fun HomeView() {
                 launchSingleTop = true
                 restoreState = true
             }
-        }
+        },
+        onLogout = { loginViewModel.logout() },
+        onBack = { controller.popBackStack() }
     ) { pd ->
         HomeNavGraph(navController = controller, pd = pd)
     }
@@ -72,9 +83,15 @@ private fun HomeScreen(
     currentScreen: Screen,
     currentRoute: String?,
     onBottomScreenClick: (Screen) -> Unit,
+    onLogout: () -> Unit = {},
+    onBack: () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
+    val title = when (currentScreen) {
+        Screen.BottomScreen.Stories -> "VP25"
+        Screen.BottomScreen.Profile -> ""
+        else -> currentScreen.title
+    }
 
     val floatingButton: @Composable () -> Unit = {
         if (currentScreen == Screen.BottomScreen.Stories){
@@ -107,22 +124,30 @@ private fun HomeScreen(
             )
         },
         topBar = {
-            //so as to control visibility based on diff situations BACK OR DRAWER
+            //so as to control visibility based on diff situations BACK OR DEFAULT
             if (currentScreen in screensWithTopBar) {
+                val isPersonProfile = currentScreen == Screen.PersonProfile
+                val isProfile = currentScreen == Screen.BottomScreen.Profile
+                val isStories = currentScreen == Screen.BottomScreen.Stories
                 VpTopAppBar(
                     title = title,
-                    showLeadingIcon = currentScreen == Screen.BottomScreen.Stories,
-                    leadingIcon = Icons.Default.AccountCircle,
-                    leadingIconContentDescription = "Menu",
-                    onLeadingIconClick = {
-                        //Open the drawer - its a suspend function remember
-                        //TODO: side drawer
-                    },
-                    actions = listOf(
-                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
-                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
-                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
-                    )
+                    titleColor = if (isStories) MaterialTheme.colorScheme.primary else Color.Unspecified,
+                    titleFontWeight = if (isStories) FontWeight.SemiBold else null,
+                    showLeadingIcon = isPersonProfile,
+                    leadingIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                    leadingIconContentDescription = "Back",
+                    onLeadingIconClick = onBack,
+                    actions = when {
+                        isPersonProfile -> emptyList()
+                        isProfile -> listOf(
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Logout", onClick = onLogout)
+                        )
+                        else -> listOf(
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                        )
+                    }
                 )
             }
         },

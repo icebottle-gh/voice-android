@@ -23,7 +23,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.theme.VpTheme
@@ -45,6 +47,8 @@ data class VpTopAppBarAction(
 fun VpTopAppBar(
     title: String,
     showTitle: Boolean = true,
+    titleColor: Color = Color.Unspecified,
+    titleFontWeight: FontWeight? = null,
     showLeadingIcon: Boolean = true,
     leadingIcon: ImageVector = Icons.Filled.ArrowBack,
     leadingIconContentDescription: String? = null,
@@ -66,6 +70,8 @@ fun VpTopAppBar(
             if (showTitle) {
                 Text(
                     text = title,
+                    color = titleColor,
+                    fontWeight = titleFontWeight,
                     modifier = Modifier.heightIn(max = 30.dp)
                 )
             }

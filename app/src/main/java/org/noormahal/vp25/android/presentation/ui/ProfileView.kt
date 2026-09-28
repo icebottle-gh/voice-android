@@ -1,9 +1,11 @@
 package org.noormahal.vp25.android.presentation.ui
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.noormahal.vp25.android.common.makeConnectionStatus
 import org.noormahal.vp25.android.components.BroadcastGroupSummary
@@ -13,13 +15,18 @@ import org.noormahal.vp25.android.presentation.viewmodel.ProfileViewModel
 @Composable
 fun OwnProfileView(viewModel: ProfileViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.fetchOwnProfile()
     }
 
-    // TODO: ProfileViewModel doesn't fetch the user's broadcast groups yet - placeholder
-    //  data until that's wired up.
+    LaunchedEffect(Unit) {
+        viewModel.actionError.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     PersonProfile(
         isLoading = uiState.isLoading,
         error = uiState.error,
@@ -32,16 +39,24 @@ fun OwnProfileView(viewModel: ProfileViewModel = viewModel()) {
         ),
         onFollow = {},
         onUnfollow = {},
-        onNickNameChange = { viewModel.updateUserNickname(it) }
+        onNickNameChange = { viewModel.updateUserNickname(it) },
+        onBioChange = { viewModel.updateOwnBio(it) }
     )
 }
 
 @Composable
 fun PersonProfileView(userId: String, viewModel: ProfileViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(userId) {
         viewModel.fetchUserProfile(userId)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.actionError.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     PersonProfile(
@@ -49,9 +64,9 @@ fun PersonProfileView(userId: String, viewModel: ProfileViewModel = viewModel())
         error = uiState.error,
         profile = uiState.profile,
         connectionStatus = uiState.profile?.let {
-            // TODO: isFollower isn't tracked by ProfileViewModel yet
-            makeConnectionStatus(user = it.id, isFollowing = uiState.isFollowing, isFollower = false)
+            makeConnectionStatus(user = it.id, isFollowing = uiState.isFollowing, isFollower = uiState.isFollower)
         },
+        connectionLoadFailed = uiState.connectionLoadFailed,
         isOwnProfile = uiState.isOwnProfile,
         onFollow = { viewModel.toggleFollowStatus() },
         onUnfollow = { viewModel.toggleFollowStatus() },
