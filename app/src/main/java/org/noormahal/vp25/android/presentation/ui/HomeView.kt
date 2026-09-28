@@ -7,33 +7,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.launch
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.components.FabStyle
 import org.noormahal.vp25.android.components.VpBottomBar
-import org.noormahal.vp25.android.components.VpDrawerItem
 import org.noormahal.vp25.android.components.VpFab
-import org.noormahal.vp25.android.components.VpNavigationDrawer
 import org.noormahal.vp25.android.components.VpTopAppBar
 import org.noormahal.vp25.android.components.VpTopAppBarAction
 import org.noormahal.vp25.android.presentation.navigation.HomeNavGraph
@@ -52,14 +47,9 @@ fun HomeView(
     profileViewModel: ProfileViewModel = viewModel()
 ) {
 
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val drawerScope = rememberCoroutineScope()
-
-    val profileUiState by profileViewModel.uiState.collectAsState()
     LaunchedEffect(Unit) {
         profileViewModel.fetchOwnProfile()
     }
-
 
     val controller: NavController = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
@@ -69,33 +59,22 @@ fun HomeView(
         allScreens.find { it.route == currentRoute } ?: Screen.BottomScreen.Stories
     }
 
-    VpNavigationDrawer(
-        drawerState = drawerState,
-        items = listOf(
-            VpDrawerItem(label = "Logout", onClick = { loginViewModel.logout() })
-        ),
-        userName = profileUiState.profile?.fullName,
-        // Swipe-to-open should only work on the Stories tab, matching where the
-        // drawer's own avatar/menu icon is shown in the top bar.
-        gesturesEnabled = currentScreen == Screen.BottomScreen.Stories
-    ) {
-        HomeScreen(
-            currentScreen = currentScreen,
-            currentRoute = currentRoute,
-            onBottomScreenClick = { screen ->
-                controller.navigate(screen.route) {
-                    popUpTo(controller.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
+    HomeScreen(
+        currentScreen = currentScreen,
+        currentRoute = currentRoute,
+        onBottomScreenClick = { screen ->
+            controller.navigate(screen.route) {
+                popUpTo(controller.graph.findStartDestination().id) {
+                    saveState = true
                 }
-            },
-            onOpenDrawer = { drawerScope.launch { drawerState.open() } },
-            onBack = { controller.popBackStack() }
-        ) { pd ->
-            HomeNavGraph(navController = controller, pd = pd)
-        }
+                launchSingleTop = true
+                restoreState = true
+            }
+        },
+        onLogout = { loginViewModel.logout() },
+        onBack = { controller.popBackStack() }
+    ) { pd ->
+        HomeNavGraph(navController = controller, pd = pd)
     }
 }
 
@@ -104,11 +83,15 @@ private fun HomeScreen(
     currentScreen: Screen,
     currentRoute: String?,
     onBottomScreenClick: (Screen) -> Unit,
-    onOpenDrawer: () -> Unit = {},
+    onLogout: () -> Unit = {},
     onBack: () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val title = if (currentScreen == Screen.BottomScreen.Stories) "Voice" else currentScreen.title
+    val title = when (currentScreen) {
+        Screen.BottomScreen.Stories -> "VP25"
+        Screen.BottomScreen.Profile -> ""
+        else -> currentScreen.title
+    }
 
     val floatingButton: @Composable () -> Unit = {
         if (currentScreen == Screen.BottomScreen.Stories){
@@ -141,20 +124,30 @@ private fun HomeScreen(
             )
         },
         topBar = {
-            //so as to control visibility based on diff situations BACK OR DRAWER
+            //so as to control visibility based on diff situations BACK OR DEFAULT
             if (currentScreen in screensWithTopBar) {
                 val isPersonProfile = currentScreen == Screen.PersonProfile
+                val isProfile = currentScreen == Screen.BottomScreen.Profile
+                val isStories = currentScreen == Screen.BottomScreen.Stories
                 VpTopAppBar(
                     title = title,
-                    showLeadingIcon = currentScreen == Screen.BottomScreen.Stories || isPersonProfile,
-                    leadingIcon = if (isPersonProfile) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.AccountCircle,
-                    leadingIconContentDescription = if (isPersonProfile) "Back" else "Menu",
-                    onLeadingIconClick = if (isPersonProfile) onBack else onOpenDrawer,
-                    actions = if (isPersonProfile) emptyList() else listOf(
-                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
-                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
-                        VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
-                    )
+                    titleColor = if (isStories) MaterialTheme.colorScheme.primary else Color.Unspecified,
+                    titleFontWeight = if (isStories) FontWeight.SemiBold else null,
+                    showLeadingIcon = isPersonProfile,
+                    leadingIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                    leadingIconContentDescription = "Back",
+                    onLeadingIconClick = onBack,
+                    actions = when {
+                        isPersonProfile -> emptyList()
+                        isProfile -> listOf(
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Logout", onClick = onLogout)
+                        )
+                        else -> listOf(
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),
+                        )
+                    }
                 )
             }
         },

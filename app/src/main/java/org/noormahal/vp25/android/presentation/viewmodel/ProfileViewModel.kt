@@ -37,6 +37,7 @@ data class ProfileScreenUiState(
     val nickname: String? = null, // Store nickname separately if not part of PersonalizedProfile
     val isFollowing: Boolean = false,
     val isFollower: Boolean = false,
+    val connectionLoadFailed: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
     val isOwnProfile: Boolean = false // To show/hide edit icon
@@ -82,26 +83,30 @@ class ProfileViewModel : ViewModel() {
                 val profileDeferred = async { Client.user!!.people().getProfiles(listOf(userId)).firstOrNull() }
                 val ownUsernameDeferred = async { Client.user!!.account().getDetails().username }
                 // Connection status is best-effort: a failure here (e.g. the connections
-                // endpoint erroring out) shouldn't block the rest of the profile from showing.
+                // endpoint erroring out) shouldn't block the rest of the profile from showing,
+                // but the failure itself is tracked so the UI can say so instead of silently
+                // defaulting to "not following".
                 val connectionDeferred = async {
                     try {
-                        Client.user!!.connections().get().find { it.user == userId }
+                        Result.success(Client.user!!.connections().get().find { it.user == userId })
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Client.reportIfUnauthorized(e)
-                        null
+                        Result.failure(e)
                     }
                 }
 
                 val fetchedProfile = profileDeferred.await()
                 if (fetchedProfile != null) {
                     val ownUsername = ownUsernameDeferred.await()
-                    val connectionStatus = connectionDeferred.await()
+                    val connectionResult = connectionDeferred.await()
+                    val connectionStatus = connectionResult.getOrNull()
                     _uiState.update {
                         it.copy(
                             profile = fetchedProfile,
                             isFollowing = connectionStatus?.isFollowing ?: false,
                             isFollower = connectionStatus?.isFollower ?: false,
+                            connectionLoadFailed = connectionResult.isFailure,
                             isLoading = false,
                             isOwnProfile = userId == ownUsername
                         )

@@ -20,6 +20,7 @@ import org.noormahal.vp25.android.components.rememberDelayedLoading
 import org.noormahal.vp25.android.presentation.ui.AccountSetupView
 import org.noormahal.vp25.android.presentation.ui.HomeView
 import org.noormahal.vp25.android.presentation.ui.LoginView
+import org.noormahal.vp25.android.presentation.ui.UnverifiedView
 import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
 
 @Composable
@@ -44,8 +45,10 @@ fun AppNavGraph(
     var hasHandledInitialRouting by remember { mutableStateOf(false) }
     LaunchedEffect(isLoggedIn) {
         if (hasHandledInitialRouting && !isLoggedIn) {
+            // popUpTo(0) clears the whole back stack regardless of which screen logout
+            // was triggered from (home, account setup, or the unverified landing page).
             navController.navigate("login") {
-                popUpTo("home") { inclusive = true }
+                popUpTo(0)
             }
         }
         hasHandledInitialRouting = true
@@ -54,8 +57,13 @@ fun AppNavGraph(
     NavHost(navController = navController, startDestination = if (isLoggedIn) "home" else "login") {
         composable("login") {
             LoginView (
-                onLoginSuccess = { needsAccountSetup ->
-                    navController.navigate(if (needsAccountSetup) "account_setup" else "home") {
+                onLoginSuccess = { destination ->
+                    val route = when (destination) {
+                        PostAuthDestination.ACCOUNT_SETUP -> "account_setup"
+                        PostAuthDestination.UNVERIFIED -> "unverified"
+                        PostAuthDestination.HOME -> "home"
+                    }
+                    navController.navigate(route) {
                         popUpTo("login") {
                             inclusive = true
                         }
@@ -70,11 +78,16 @@ fun AppNavGraph(
         }
 
         composable("account_setup"){
-            AccountSetupView {
-                navController.navigate("home") {
+            AccountSetupView { destination ->
+                val route = if (destination == PostAuthDestination.UNVERIFIED) "unverified" else "home"
+                navController.navigate(route) {
                     popUpTo("account_setup") { inclusive = true }
                 }
             }
+        }
+
+        composable("unverified") {
+            UnverifiedView(onLogout = { loginviewModel.logout() })
         }
     }
 }

@@ -53,6 +53,7 @@ fun PersonProfile(
     error: String?,
     profile: PersonalizedProfile?,
     connectionStatus: ConnectionStatus?,
+    connectionLoadFailed: Boolean = false,
     isOwnProfile: Boolean,
     broadcastsList: List<BroadcastGroupSummary> = emptyList(),
     onFollow: () -> Unit,
@@ -76,6 +77,7 @@ fun PersonProfile(
                 ProfileContent(
                     profile = profile,
                     connectionStatus = connectionStatus,
+                    connectionLoadFailed = connectionLoadFailed,
                     isOwnProfile = isOwnProfile,
                     broadcastsList = broadcastsList,
                     modifier = Modifier.fillMaxSize(),
@@ -119,6 +121,7 @@ fun ProfileContent(
     profile: PersonalizedProfile,
     isOwnProfile: Boolean,
     connectionStatus: ConnectionStatus?,
+    connectionLoadFailed: Boolean = false,
     broadcastsList: List<BroadcastGroupSummary>,
     modifier: Modifier,
     onFollow: () -> Unit,
@@ -215,7 +218,14 @@ fun ProfileContent(
             }
 
             // Follow/Following/Requested Button (other people's profiles only)
-            if (!isOwnProfile && connectionStatus != null) {
+            if (!isOwnProfile && connectionLoadFailed) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Couldn't load connection info",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else if (!isOwnProfile && connectionStatus != null) {
                 Spacer(modifier = Modifier.height(20.dp))
                 // TODO: ConnectionStatus only carries isFollowing/isFollower today, so REQUESTED
                 //  can't be derived yet - wire that up once the "requested" state exists in the data layer.

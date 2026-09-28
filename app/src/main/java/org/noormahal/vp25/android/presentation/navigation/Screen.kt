@@ -54,7 +54,7 @@ sealed class Screen(val title: String, val route: String){
         )
 
         object Profile : BottomScreen(
-            "Profile",
+            "Account",
             "my_profile_route",
             R.drawable.baseline_account_circle_24,
             R.drawable.baseline_account_circle_24,

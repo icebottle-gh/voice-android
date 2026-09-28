@@ -16,6 +16,8 @@ import kotlinx.coroutines.withContext
 import org.noormahal.ib.vakkic.AppImpl
 import org.noormahal.ib.vakkic.UserImpl
 import org.noormahal.ib.vakkic.enums.AccountState
+import org.noormahal.vp25.android.presentation.navigation.PostAuthDestination
+import org.noormahal.vp25.android.presentation.navigation.toPostAuthDestination
 
 class LoginViewModel(application: Application): AndroidViewModel(application) {
     private val _isLoggedIn = MutableStateFlow(false) // Replace with actual login check
@@ -58,11 +60,11 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    fun login(mobile: String, otp: String, onSuccess: (needsAccountSetup: Boolean) -> Unit) {
+    fun login(mobile: String, otp: String, onSuccess: (PostAuthDestination) -> Unit) {
         _loginError.value = null
         viewModelScope.launch {
             try {
-                val needsAccountSetup = withContext(Dispatchers.IO) {
+                val destination = withContext(Dispatchers.IO) {
                     val user = Client.app.login(mobile, otp)
                     secretStore.setSecret(user.serialize())
                     Client.user = user
@@ -72,10 +74,14 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
                         e.printStackTrace()
                         null
                     }
-                    details == null || AccountState.fromSerialized(details.accountState) == AccountState.SETUP
+                    if (details == null) {
+                        PostAuthDestination.ACCOUNT_SETUP
+                    } else {
+                        AccountState.fromSerialized(details.accountState).toPostAuthDestination()
+                    }
                 }
                 setLoggedIn(true)
-                onSuccess(needsAccountSetup)
+                onSuccess(destination)
             } catch (e: Exception) {
                 e.printStackTrace()
                 _loginError.value = e.message ?: "Something went wrong. Please try again."

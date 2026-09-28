@@ -66,6 +66,7 @@ fun PersonProfileView(userId: String, viewModel: ProfileViewModel = viewModel())
         connectionStatus = uiState.profile?.let {
             makeConnectionStatus(user = it.id, isFollowing = uiState.isFollowing, isFollower = uiState.isFollower)
         },
+        connectionLoadFailed = uiState.connectionLoadFailed,
         isOwnProfile = uiState.isOwnProfile,
         onFollow = { viewModel.toggleFollowStatus() },
         onUnfollow = { viewModel.toggleFollowStatus() },

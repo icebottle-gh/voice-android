@@ -8,11 +8,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.noormahal.vp25.android.components.Login
+import org.noormahal.vp25.android.presentation.navigation.PostAuthDestination
 import org.noormahal.vp25.android.presentation.viewmodel.LoginViewModel
 
 
 @Composable
-fun LoginView(onLoginSuccess: (needsAccountSetup: Boolean) -> Unit, loginViewModel: LoginViewModel = viewModel()) {
+fun LoginView(onLoginSuccess: (PostAuthDestination) -> Unit, loginViewModel: LoginViewModel = viewModel()) {
     val peekedOtp by loginViewModel.otp
     val loginError by loginViewModel.loginError
     var mobile by remember {
