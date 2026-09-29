@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,6 +63,35 @@ fun PersonListItem(
         }
         Spacer(modifier = Modifier.width(8.dp))
         trailingContent()
+    }
+}
+
+
+@Composable
+fun PersonListItemSkeleton(
+    modifier: Modifier = Modifier,
+    showSubtitle: Boolean = false,
+    showTrailing: Boolean = false
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = VpSpacing.screenHorizontal, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ShimmerCircle(size = 40.dp)
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            ShimmerLine(widthFraction = 0.5f)
+            if (showSubtitle) {
+                Spacer(modifier = Modifier.height(4.dp))
+                ShimmerLine(widthFraction = 0.3f, height = 12.dp)
+            }
+        }
+        if (showTrailing) {
+            Spacer(modifier = Modifier.width(8.dp))
+            ShimmerBox(width = 72.dp, height = 32.dp, shape = RoundedCornerShape(50))
+        }
     }
 }
 
@@ -153,6 +184,14 @@ fun PersonListItemPreview() {
                         }
                     }
                 )
+
+                // Skeleton (loading) — name only, e.g. Find
+                PersonListItemSkeleton()
+                PersonListItemSkeleton()
+
+                // Skeleton (loading) — name + subtitle + trailing action
+                PersonListItemSkeleton(showSubtitle = true, showTrailing = true)
+                PersonListItemSkeleton(showSubtitle = true, showTrailing = true)
             }
         }
     }

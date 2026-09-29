@@ -51,7 +51,15 @@ class ProfileViewModel : ViewModel() {
     private val _actionError = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val actionError: SharedFlow<String> = _actionError.asSharedFlow()
 
+    // Re-entering the Profile tab re-triggers fetchOwnProfile() every time (OwnProfileView's
+    // LaunchedEffect(Unit) fires on each recomposition), even though this ViewModel instance -
+    // and whatever it already fetched - persists across those visits. This flag makes the
+    // actual fetch run at most once per instance instead of on every revisit.
+    private var hasFetchedOwnProfile = false
+
     fun fetchOwnProfile() {
+        if (hasFetchedOwnProfile) return
+        hasFetchedOwnProfile = true
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
@@ -66,6 +74,9 @@ class ProfileViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
+                // Allow a retry on the next call (e.g. navigating back to the tab again) rather
+                // than leaving this instance permanently stuck on one failed attempt.
+                hasFetchedOwnProfile = false
                 e.printStackTrace()
                 Client.reportIfUnauthorized(e)
                 _uiState.update { it.copy(error = e.message ?: "Something went wrong. Please try again.", isLoading = false) }
