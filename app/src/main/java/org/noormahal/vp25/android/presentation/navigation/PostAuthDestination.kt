@@ -9,3 +9,9 @@ fun AccountState.toPostAuthDestination(): PostAuthDestination = when (this) {
     AccountState.UNVERIFIED -> PostAuthDestination.UNVERIFIED
     AccountState.ACTIVE -> PostAuthDestination.HOME
 }
+
+fun PostAuthDestination.toRoute(): String = when (this) {
+    PostAuthDestination.ACCOUNT_SETUP -> "account_setup"
+    PostAuthDestination.UNVERIFIED -> "unverified"
+    PostAuthDestination.HOME -> "home"
+}
