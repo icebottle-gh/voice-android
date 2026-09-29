@@ -1,5 +1,6 @@
 package org.noormahal.vp25.android.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -19,13 +20,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -85,22 +85,9 @@ fun VpYearPicker(
 
     if (showDialog) {
         var pendingValue by remember { mutableIntStateOf(value ?: range.last) }
-        AlertDialog(
+        VpDialog(
             onDismissRequest = { showDialog = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    onValueChange(pendingValue)
-                    showDialog = false
-                }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
-                }
-            },
-            text = {
+            content = {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center,
@@ -112,6 +99,17 @@ fun VpYearPicker(
                     )
                 }
             },
+            buttons = listOf(
+                VpDialogButtonSpec(text = "Cancel", onClick = { showDialog = false }, style = ButtonStyle.PRIMARY_FRAMELESS),
+                VpDialogButtonSpec(
+                    text = "OK",
+                    onClick = {
+                        onValueChange(pendingValue)
+                        showDialog = false
+                    },
+                    style = ButtonStyle.PRIMARY_FRAMELESS
+                )
+            )
         )
     }
 }
@@ -212,6 +210,34 @@ fun VpYearPickerFilledPreview() {
                 onValueChange = {},
                 label = "Year Of Birth",
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun VpYearPickerDialogPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            VpDialogCard(
+                buttons = listOf(
+                    VpDialogButtonSpec(text = "Cancel", onClick = {}, style = ButtonStyle.PRIMARY_FRAMELESS),
+                    VpDialogButtonSpec(text = "OK", onClick = {}, style = ButtonStyle.PRIMARY_FRAMELESS)
+                ),
+                content = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        YearWheel(
+                            value = 2000,
+                            range = DEFAULT_MIN_YEAR..currentYear(),
+                            onValueChange = {},
+                        )
+                    }
+                }
             )
         }
     }

@@ -18,16 +18,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -365,29 +361,25 @@ fun EditNicknameDialog(
 ) {
     var nicknameInput by remember { mutableStateOf(currentNickname ?: "") }
 
-    AlertDialog(
+    VpDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Nickname") },
-        text = {
-            OutlinedTextField(
+        title = "Edit Nickname",
+        content = {
+            VpTextField(
                 value = nicknameInput,
                 onValueChange = { nicknameInput = it },
-                label = { Text("Nickname (optional)") },
-                placeholder = { Text("Enter nickname or leave blank") },
+                placeholder = "Enter nickname or leave blank",
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
             )
         },
-        confirmButton = {
-            Button(onClick = { onConfirm(nicknameInput.takeIf { it.isNotBlank() }) }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
+        buttons = listOf(
+            VpDialogButtonSpec(text = "Cancel", onClick = onDismiss, style = ButtonStyle.ROUND_PRIMARY_OUTLINE),
+            VpDialogButtonSpec(
+                text = "Save",
+                onClick = { onConfirm(nicknameInput.takeIf { it.isNotBlank() }) },
+                style = ButtonStyle.ROUND_PRIMARY
+            )
+        )
     )
 }
 
@@ -399,30 +391,27 @@ fun EditBioDialog(
 ) {
     var bioInput by remember { mutableStateOf(currentBio ?: "") }
 
-    AlertDialog(
+    VpDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (currentBio.isNullOrBlank()) "Add Bio" else "Edit Bio") },
-        text = {
-            OutlinedTextField(
+        title = if (currentBio.isNullOrBlank()) "Add Bio" else "Edit Bio",
+        content = {
+            VpTextField(
                 value = bioInput,
                 onValueChange = { bioInput = it },
-                label = { Text("Bio") },
-                placeholder = { Text("Tell people about yourself") },
+                label = "Bio",
+                placeholder = "Tell people about yourself",
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
-                maxLines = 6
             )
         },
-        confirmButton = {
-            Button(onClick = { onConfirm(bioInput.takeIf { it.isNotBlank() }) }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
+        buttons = listOf(
+            VpDialogButtonSpec(text = "Cancel", onClick = onDismiss, style = ButtonStyle.ROUND_PRIMARY_OUTLINE),
+            VpDialogButtonSpec(
+                text = "Save",
+                onClick = { onConfirm(bioInput.takeIf { it.isNotBlank() }) },
+                style = ButtonStyle.ROUND_PRIMARY
+            )
+        )
     )
 }
 
