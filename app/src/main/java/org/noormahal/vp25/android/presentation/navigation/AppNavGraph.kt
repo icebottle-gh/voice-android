@@ -63,7 +63,8 @@ fun AppNavGraph(
         }
 
         composable("account_setup"){
-            AccountSetupView { destination ->
+            val initialMobile by loginviewModel.setupMobile.collectAsState()
+            AccountSetupView(initialMobile = initialMobile) { destination ->
                 val route = if (destination == PostAuthDestination.UNVERIFIED) "unverified" else "home"
                 navController.navigate(route) {
                     popUpTo("account_setup") { inclusive = true }

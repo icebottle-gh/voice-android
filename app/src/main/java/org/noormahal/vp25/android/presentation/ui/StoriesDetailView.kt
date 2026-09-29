@@ -50,6 +50,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import org.noormahal.vp25.android.components.StoriesTopBar
+import org.noormahal.vp25.android.components.ShimmerLine
 import org.noormahal.vp25.android.data.Story
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
@@ -625,36 +626,17 @@ fun ShimmerStory(paddingValues: PaddingValues) {
         Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(24.dp))
         Column() {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 8.dp)
-                .height(18.dp)
-                .shimmerEffect())
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 8.dp)
-                .height(18.dp)
-                .shimmerEffect())
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 8.dp)
-                .height(18.dp)
-                .shimmerEffect())
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 8.dp)
-                .height(18.dp)
-                .shimmerEffect())
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 8.dp)
-                .height(18.dp)
-                .shimmerEffect())
-            Box(modifier = Modifier
-                .padding(vertical = 6.dp, horizontal = 8.dp)
-                .height(18.dp)
-                .fillMaxWidth(fraction = 0.75f)
-                .shimmerEffect())
+            repeat(5) {
+                ShimmerLine(
+                    modifier = Modifier.padding(vertical = 6.dp, horizontal = 8.dp),
+                    height = 18.dp
+                )
+            }
+            ShimmerLine(
+                modifier = Modifier.padding(vertical = 6.dp, horizontal = 8.dp),
+                height = 18.dp,
+                widthFraction = 0.75f
+            )
         }
         Spacer(modifier = Modifier.height(24.dp))
         Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)

@@ -27,6 +27,8 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
     val isLoadingSession: StateFlow<Boolean> = _isLoadingSession
     private val _postAuthDestination = MutableStateFlow<PostAuthDestination?>(null)
     val postAuthDestination: StateFlow<PostAuthDestination?> = _postAuthDestination
+    private val _setupMobile = MutableStateFlow<String?>(null)
+    val setupMobile: StateFlow<String?> = _setupMobile
     private val secretStore: EncryptedSecretStore = EncryptedSecretStore(application)
 
     private val _otp = mutableStateOf("")
@@ -71,7 +73,7 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
                     val user = Client.app.login(mobile, otp)
                     secretStore.setSecret(user.serialize())
                     Client.user = user
-                    resolvePostAuthDestination(user)
+                    resolvePostAuthDestination(user, fallbackMobile = mobile)
                 }
                 _postAuthDestination.value = destination
                 setLoggedIn(true)
@@ -116,13 +118,14 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    private suspend fun resolvePostAuthDestination(user: User): PostAuthDestination {
+    private suspend fun resolvePostAuthDestination(user: User, fallbackMobile: String? = null): PostAuthDestination {
         val details = try {
             withContext(Dispatchers.IO) { user.account().getDetails() }
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
+        _setupMobile.value = details?.mobile ?: fallbackMobile
         return if (details == null) {
             PostAuthDestination.ACCOUNT_SETUP
         } else {

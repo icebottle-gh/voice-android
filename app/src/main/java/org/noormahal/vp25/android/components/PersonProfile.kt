@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,15 +58,16 @@ fun PersonProfile(
 ) {
     var showEditNicknameDialog by remember { mutableStateOf(false) }
     var showEditBioDialog by remember { mutableStateOf(false) }
-    val showLoadingSpinner = rememberDelayedLoading(isLoading)
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize()) {
         when {
-            showLoadingSpinner -> {
-                CircularProgressIndicator()
+            isLoading -> {
+                ProfileSkeleton(modifier = Modifier.fillMaxSize())
             }
             error != null -> {
-                Text("Error: ${error}", color = MaterialTheme.colorScheme.error)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Error: ${error}", color = MaterialTheme.colorScheme.error)
+                }
             }
             profile != null -> {
                 ProfileContent(
@@ -82,9 +82,6 @@ fun PersonProfile(
                     onEditNicknameClick = { showEditNicknameDialog = true },
                     onEditBioClick = { showEditBioDialog = true }
                 )
-            }
-            else -> {
-                Text("Profile not found or still loading.")
             }
         }
     }
@@ -109,6 +106,46 @@ fun PersonProfile(
                 showEditBioDialog = false
             }
         )
+    }
+}
+@Composable
+private fun ProfileSkeleton(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ShimmerCircle(size = 84.dp)
+            Spacer(modifier = Modifier.height(12.dp))
+            ShimmerLine(widthFraction = 0.4f, height = 22.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+            ShimmerLine(widthFraction = 0.3f, height = 14.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Column(modifier = Modifier.padding(horizontal = VpSpacing.screenHorizontal)) {
+            ShimmerLine(height = 14.dp)
+            Spacer(modifier = Modifier.height(6.dp))
+            ShimmerLine(widthFraction = 0.8f, height = 14.dp)
+            Spacer(modifier = Modifier.height(6.dp))
+            ShimmerLine(widthFraction = 0.6f, height = 14.dp)
+        }
+    }
+}
+
+// Previews ProfileSkeleton directly rather than through PersonProfile(isLoading = true, ...) -
+// that path is gated behind rememberDelayedLoading's 300ms delay, which a static preview isn't
+// guaranteed to wait out, so it can render blank.
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ProfileSkeletonPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ProfileSkeleton(modifier = Modifier.fillMaxSize())
+        }
     }
 }
 
