@@ -96,19 +96,3 @@ val screensWithBottom = listOf(
     Screen.BottomScreen.Alerts,
     Screen.BottomScreen.Profile
 )
-
-
-val screensWithTopBar = screensWithBottom + Screen.PersonProfile
-
-val allScreens = listOf(
-
-    Screen.Login,
-    Screen.BottomScreen.Stories,
-    // Screen.BottomScreen.Chats,
-    Screen.BottomScreen.Alerts,
-    Screen.BottomScreen.Find,
-    Screen.BottomScreen.Profile,
-
-    Screen.StoriesDetail,
-    Screen.PersonProfile
-)

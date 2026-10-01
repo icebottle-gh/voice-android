@@ -31,16 +31,16 @@ private fun AccountInformation.toPersonalizedProfile(): PersonalizedProfile {
     )
 }
 
-// Data class to hold all profile screen state
+
 data class ProfileScreenUiState(
     val profile: PersonalizedProfile? = null,
-    val nickname: String? = null, // Store nickname separately if not part of PersonalizedProfile
+    val nickname: String? = null,
     val isFollowing: Boolean = false,
     val isFollower: Boolean = false,
     val connectionLoadFailed: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isOwnProfile: Boolean = false // To show/hide edit icon
+    val isOwnProfile: Boolean = false
 )
 
 class ProfileViewModel : ViewModel() {
@@ -50,11 +50,6 @@ class ProfileViewModel : ViewModel() {
 
     private val _actionError = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val actionError: SharedFlow<String> = _actionError.asSharedFlow()
-
-    // Re-entering the Profile tab re-triggers fetchOwnProfile() every time (OwnProfileView's
-    // LaunchedEffect(Unit) fires on each recomposition), even though this ViewModel instance -
-    // and whatever it already fetched - persists across those visits. This flag makes the
-    // actual fetch run at most once per instance instead of on every revisit.
     private var hasFetchedOwnProfile = false
 
     fun fetchOwnProfile() {
@@ -74,8 +69,6 @@ class ProfileViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
-                // Allow a retry on the next call (e.g. navigating back to the tab again) rather
-                // than leaving this instance permanently stuck on one failed attempt.
                 hasFetchedOwnProfile = false
                 e.printStackTrace()
                 Client.reportIfUnauthorized(e)
@@ -88,15 +81,9 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                // These three reads are independent of each other, so fetch them concurrently
-                // instead of one after another - total wait time becomes the slowest of the
-                // three rather than the sum of all three.
                 val profileDeferred = async { Client.user!!.people().getProfiles(listOf(userId)).firstOrNull() }
                 val ownUsernameDeferred = async { Client.user!!.account().getDetails().username }
-                // Connection status is best-effort: a failure here (e.g. the connections
-                // endpoint erroring out) shouldn't block the rest of the profile from showing,
-                // but the failure itself is tracked so the UI can say so instead of silently
-                // defaulting to "not following".
+
                 val connectionDeferred = async {
                     try {
                         Result.success(Client.user!!.connections().get().find { it.user == userId })

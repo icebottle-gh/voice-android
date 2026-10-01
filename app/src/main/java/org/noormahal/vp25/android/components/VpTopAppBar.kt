@@ -33,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.theme.VpTheme
 
-/** Visible action icons on a bar are capped at this count; matches Material's guidance to overflow beyond ~5. */
 private const val MAX_VISIBLE_ACTIONS = 5
 private val DROPDOWN_MIN_WIDTH = 180.dp
 
