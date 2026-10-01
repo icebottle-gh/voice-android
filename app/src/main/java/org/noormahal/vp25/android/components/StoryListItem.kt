@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.data.User
+import org.noormahal.vp25.android.theme.VpSpacing
 import org.noormahal.vp25.android.theme.VpTheme
 
 @Composable
@@ -56,7 +57,7 @@ fun StoryListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+            .padding(horizontal = VpSpacing.screenHorizontal, vertical = 4.dp)
             .clip(RoundedCornerShape(10.dp))
             .clickable { onClick() }
             .then(
@@ -93,7 +94,6 @@ fun StoryListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // TODO: profile image/avatar once user.userImageThumb is available
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = cardTitle,
                     style = MaterialTheme.typography.titleSmall,
@@ -118,6 +118,20 @@ fun StoryListItem(
     }
 }
 
+@Composable
+fun StoryListItemSkeleton() {
+    // The whole card shape shimmers, rather than a bordered card with a shimmering
+    // name inside it - at this point we don't know yet whether this slot resolves
+    // to an item at all, so it shouldn't look like a real card is already there.
+    ShimmerBox(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = VpSpacing.screenHorizontal, vertical = 4.dp),
+        height = 64.dp,
+        shape = RoundedCornerShape(10.dp)
+    )
+}
+
 @Preview(name = "Light", showBackground = true)
 @Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -129,6 +143,11 @@ fun StoryListItemPreview() {
                 StoryListItem(User("234", "Muhammed Salih", true), isMyStory = false) {}
                 // Viewed story -> outlineVariant ring
                 StoryListItem(User("234", "John Doe", false), isMyStory = false) {}
+
+                // Loading
+                StoryListItemSkeleton()
+                StoryListItemSkeleton()
+                StoryListItemSkeleton()
             }
         }
     }

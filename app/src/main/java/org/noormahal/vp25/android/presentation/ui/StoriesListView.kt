@@ -1,10 +1,7 @@
 package org.noormahal.vp25.android.presentation.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.MaterialTheme
@@ -16,13 +13,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
 import org.noormahal.vp25.android.R
 import org.noormahal.vp25.android.components.FabStyle
-import org.noormahal.vp25.android.components.StoryListItem
+import org.noormahal.vp25.android.components.StoriesList
 import org.noormahal.vp25.android.components.VpFab
 import org.noormahal.vp25.android.components.VpTopAppBarAction
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Home-shell entry point for the Stories tab: owns its own chrome (title/FAB/actions). */
 @Composable
@@ -53,49 +49,29 @@ fun StoriesListScreen(
         }
     ) { pd ->
         Box(modifier = Modifier.padding(pd)) {
-            StoriesList(navController, storiesViewModel)
+            StoriesListView(navController, storiesViewModel)
         }
     }
 }
 
 @Composable
-fun StoriesList(navController: NavHostController, storiesViewModel : StoriesViewModel) {
+fun StoriesListView(navController: NavHostController, storiesViewModel: StoriesViewModel) {
 //    val usersList = storiesViewModel.usersList.collectAsState(initial = listOf())
 
-    val usersList = MutableStateFlow(listOf(
+    // dummy data for now, pending real data wiring
+    val usersList = listOf(
         User("Saji", "Sajidha Abdulla", true),
         User("sali", "Muhammed Salih", true),
         User("hahi", "Ravi", true),
         User("kiki", "Ahmed", false),
         User("chuchu", "Dani", false),
-    ))
+    )
 
-
-    // also get your stories
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-
-        //Your Story card here
-        item {
-            StoryListItem(
-                user = User(
-                    "123",
-                    "Sajidha",
-                    hasUnviewedStory = false
-                ),
-                isMyStory = true
-            ) {
-                //navigate to my stories detail
-            }
-        }
-
-        //other users stories card
-        items(usersList.value){
-                user->
-            StoryListItem(user = user) {
-                navController.navigate(Screen.StoriesDetail.createRoute(user.userName))
-            }
-        }
-    }
-
+    StoriesList(
+        myStoryUser = User("123", "Sajidha", hasUnviewedStory = false),
+        users = usersList,
+        onMyStoryClick = { /* navigate to my stories detail */ },
+        onUserClick = { user -> navController.navigate(Screen.StoriesDetail.createRoute(user.userName)) }
+    )
 }
 //    val usersList = storiesViewModel.getStoryListUsers
