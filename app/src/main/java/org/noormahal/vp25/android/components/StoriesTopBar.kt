@@ -3,10 +3,14 @@ package org.noormahal.vp25.android.components
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -27,8 +31,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.R
+import org.noormahal.vp25.android.theme.VpSpacing
 import org.noormahal.vp25.android.theme.VpTheme
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StoriesTopBar(
     username: String,
@@ -45,7 +51,8 @@ fun StoriesTopBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 2.dp, vertical = 4.dp)
+            .windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility)
+            .padding(horizontal = 2.dp, vertical = 0.dp)
     ) {
         VpStoriesProgressIndicator(storyCount, storyIndex, timeProgress)
         Row(

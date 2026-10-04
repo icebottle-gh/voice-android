@@ -1,62 +1,57 @@
 package org.noormahal.vp25.android.presentation.ui
 
-//import org.noormahal.vp25.android.data.Stories
 import android.app.Activity
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
+import org.noormahal.vp25.android.R
+import org.noormahal.vp25.android.components.FabStyle
+import org.noormahal.vp25.android.components.ShimmerStory
 import org.noormahal.vp25.android.components.StoriesTopBar
-import org.noormahal.vp25.android.components.ShimmerLine
+import org.noormahal.vp25.android.components.StoryAnalyticsSheetContent
+import org.noormahal.vp25.android.components.StoryContentCard
+import org.noormahal.vp25.android.components.VpFab
 import org.noormahal.vp25.android.data.Story
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
-import org.noormahal.vp25.android.theme.StoryContentTextStyle
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -85,12 +80,10 @@ fun StoriesDetail(userName: String, storiesViewModel: StoriesViewModel, navContr
         }
     }
 
-//    users list userid, userName,..
-//    val storySessionUserList by storiesViewModel.storySessionUsers.collectAsState()
-//    val storySessionStoriesMap by storiesViewModel.userStoriesMap.collectAsState()
-
+    // dummy data for now, pending real backend wiring
+    // (storiesViewModel.startStorySession() above already populates storySessionUsers/userStoriesMap for real)
     val storySessionUserList = listOf(
-        User("Saji", "Sajidha Abdulla", true),
+        User("saji", "Sajidha Abdulla", true),
         User("sali", "Muhammed Salih", true),
         User("hahi", "Hahahahahha", true),
         User("kiki", "Kiki Kuku", false),
@@ -175,6 +168,8 @@ fun StoriesDetail(userName: String, storiesViewModel: StoriesViewModel, navContr
         val storiesState = storySessionStoriesMap[user.userName]?: StoriesViewModel.StoriesListState()
         StoriesDetailPage(
             user = user,
+            // TODO: replace with the real current-user id once auth/session state is wired here
+            isMyStory = user.userName == CURRENT_USER_USERNAME,
             storiesState = storiesState,
             storiesViewModel = storiesViewModel,
             navController = navController,
@@ -186,171 +181,31 @@ fun StoriesDetail(userName: String, storiesViewModel: StoriesViewModel, navContr
 
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+const val CURRENT_USER_USERNAME = "saji"
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StoriesDetailPage(
     storiesState: StoriesViewModel.StoriesListState,
     user: User,
+    isMyStory: Boolean,
     storiesViewModel: StoriesViewModel,
     navController: NavHostController,
     coroutineScope: CoroutineScope,
     userPagerState: PagerState
 ){
 
-    val storyPagerState = rememberPagerState(
-        //0 when opening first time after opening the app. Kinda race condition
-        initialPage = storiesState.storiesList.indexOfFirst {story->
-            !story.viewed
-        }.coerceAtLeast(0),
-        pageCount = { storiesState.storiesList.size }
+    val playerState = rememberStoryPlayerState(
+        storyCount = storiesState.storiesList.size,
+        initialPage = storiesState.storiesList.indexOfFirst { story -> !story.viewed }.coerceAtLeast(0),
+        userPagerState = userPagerState,
+        coroutineScope = coroutineScope,
+        onExhausted = { navController.navigateUp() }
     )
 
-    val currentStory = storiesState.storiesList.getOrNull(storyPagerState.currentPage)
-    val progress = remember{ Animatable(initialValue = 0f) }
+    // TODO: mark the settled story as viewed once real data wiring lands (storiesViewModel.markStoryAsViewed)
 
-    val pagerIsDragged by storyPagerState.interactionSource.collectIsDraggedAsState()
-
-    val pageInteractionSource = remember { MutableInteractionSource() }
-    val pageIsPressed by pageInteractionSource.collectIsPressedAsState()
-
-    // Stop auto-advancing when pager is dragged or one of the pages is pressed
-    val autoAdvance = !pagerIsDragged && !pageIsPressed
-
-    val advanceStory = remember{
-        {
-                increment: Int ->
-            coroutineScope.launch {
-                if(storyPagerState.currentPage + increment in 0 until storiesState.storiesList.size){
-                    storyPagerState.animateScrollToPage(storyPagerState.currentPage + increment)
-                }else if (increment>0 && userPagerState.currentPage < userPagerState.pageCount - 1){
-                    userPagerState.animateScrollToPage(userPagerState.currentPage+1)
-                }else if (increment<0 && userPagerState.currentPage>0){
-                    userPagerState.animateScrollToPage(userPagerState.currentPage-1)
-                }else{
-                    navController.navigateUp()
-                }
-            }
-
-        }
-    }
-
-//     Reset progress when the current story changes
-    LaunchedEffect(storyPagerState.currentPage) {
-        progress.snapTo(0f) // Immediately set progress to 0
-    }
-
-    if (autoAdvance) {
-        LaunchedEffect(storyPagerState, pageInteractionSource) {
-            while (true) {
-//                delay(2000)
-//                val nextPage = (pagerState.currentPage + 1) % pageItems.size
-//                pagerState.animateScrollToPage(nextPage)
-
-                progress.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(
-                        durationMillis = (/*currentStory.timeLength * 1000L*/ 3*1000L).toInt(),
-                        easing = LinearEasing
-                    )
-                ){
-                    if (value == 1f){
-                        advanceStory(1)
-                    }
-                }
-//                delay(100)
-            }
-        }
-    }
-
-    //For auto advancement
-//    var isPaused by remember{ mutableStateOf(false) }
-//    val currentStory = storiesState.storiesList.getOrNull(storyPagerState.currentPage)
-//    val progress = remember{ Animatable(initialValue = 0f) }
-
-    ////Story Advancing
-//    val advanceStory = remember{
-//        {
-//            increment: Int ->
-//            coroutineScope.launch {
-//                if(storyPagerState.currentPage + increment in 0 until storiesState.storiesList.size){
-//                    storyPagerState.animateScrollToPage(storyPagerState.currentPage + increment)
-//                }else if (increment>0 && userPagerState.currentPage < userPagerState.pageCount - 1){
-//                    userPagerState.animateScrollToPage(userPagerState.currentPage+1)
-//                }else if (increment<0 && userPagerState.currentPage>0){
-//                    userPagerState.animateScrollToPage(userPagerState.currentPage-1)
-//                }else{
-//                    navController.navigateUp()
-//                }
-//            }
-//
-//        }
-//    }
-
-//    //Reset progress on new page. After animation-todo later
-//    LaunchedEffect(storyPagerState.currentPage, storyPagerState.targetPage){
-//        progress.snapTo(0f)
-//        //TODO MARK AS VIEWED IF NOT already VIEWED
-//    }
-//
-//    //Auto advance logic
-//    LaunchedEffect(storyPagerState.currentPage, isPaused)/*currentStory?.timeLength)*/{
-//        if (!isPaused && currentStory !=null){
-//            progress.animateTo(
-//                targetValue = 1f,
-//                animationSpec = tween(
-//                    durationMillis = (/*currentStory.timeLength * 1000L*/ 3*1000L).toInt(),
-//                    easing = LinearEasing
-//                )
-//            ){
-//                if(value ==1f){
-//                    advanceStory(1)
-//                }
-//            }
-//        }
-////        else{
-////            progress.stop()
-////        }
-//    }
-
-//    LaunchedEffect(storyPagerState.currentPage,isPaused){
-//        if(!isPaused && currentStory !=null){
-//
-//            progress.animateTo(
-//                targetValue = 1f,
-////                //from db
-////                animationSpec = tween(durationMillis = (currentStory.timeLength * 1000L).toInt(), easing = LinearEasing)
-//                animationSpec = tween(durationMillis = (3 * 1000L).toInt(), easing = LinearEasing)
-//            )
-//            if (progress.value==1f){
-//                if (storyPagerState.currentPage < storyPagerState.pageCount-1) {
-//                    storyPagerState.animateScrollToPage(storyPagerState.currentPage + 1)
-//                } else if (userPagerState.currentPage < userPagerState.pageCount - 1) {
-//                    userPagerState.animateScrollToPage(userPagerState.currentPage + 1)
-//                } else {
-//                    navController.navigateUp()
-//                }
-//
-//                //TODO MARK AS VIEWED
-//
-//                progress.snapTo(0f)
-//
-//            }
-//
-//        }
-//
-//    }
-
-    // Update viewed status of every settled page
-//        LaunchedEffect(storyPagerState.currentPage){
-//            println(storyPagerState.currentPage)
-//            snapshotFlow {storyPagerState.currentPage}.collect{
-//                val story = stories.getOrNull(storyPagerState.currentPage)
-//                if (story != null && !story.viewed) {
-//                    storiesViewModel.markStoryAsViewed(storyId = story.storyId)
-//                }
-//            }
-//
-//        }
+    var showAnalyticsSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -358,13 +213,32 @@ fun StoriesDetailPage(
                 username = user.userName,
                 timePosted = "Yesterday, 10:45 pm",
                 storyCount = storiesState.storiesList.size,
-                storyIndex = storyPagerState.currentPage,
-                timeProgress = progress.value
+                storyIndex = playerState.storyPagerState.currentPage,
+                timeProgress = playerState.progress.value
             ) {
                 navController.navigateUp()
             }
          },
-        contentWindowInsets = WindowInsets(0.dp)
+        // TODO: uncomment once replying to a story has backend support
+        // bottomBar = {
+        //     if (!isMyStory) {
+        //         var replyText by remember { mutableStateOf("") }
+        //         StoryReplyInput(value = replyText, onValueChange = { replyText = it })
+        //     }
+        // },
+        floatingActionButton = {
+            if (isMyStory) {
+                VpFab(
+                    icon = ImageVector.vectorResource(id = R.drawable.outline_bar_chart_24),
+                    contentDescription = "View story analytics",
+                    onClick = { showAnalyticsSheet = true },
+                    modifier = Modifier.padding(bottom = 24.dp),
+                    style = FabStyle.ROUND_SECONDARY
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentWindowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
     ) { paddingValues ->
         // Use a when statement to handle the different states of the stories data.
         when {
@@ -388,34 +262,20 @@ fun StoriesDetailPage(
             storiesState.storiesList.isNotEmpty() -> {
                 StoriesPager(
                     stories = storiesState.storiesList,
-                    storiesViewModel = storiesViewModel,
                     paddingValues = paddingValues,
-                    coroutineScope = coroutineScope,
-                    navController = navController,
-                    userPagerState = userPagerState,
-                    storyPagerState = storyPagerState,
-                    pageInteractionSource = pageInteractionSource,
-                    progress = progress
-//                    onPause = { isPaused = true },
-//                    onResume = { isPaused = false },
-//                    onTapLeft = { advanceStory(-1) },
-//                    onTapRight = { advanceStory(1) }
+                    storyPagerState = playerState.storyPagerState,
+                    advanceStory = playerState::advanceStory,
+                    onPressedChange = playerState::setPressed
                 )
             }
 
-//            else -> {
-//                // Handle the case where there are no stories.  This might not be an error,
-//                // so we display a different message.
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(paddingValues),
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                    verticalArrangement = Arrangement.Center
-//                ) {
-//                    Text("No stories available for ${user.userName}.")
-//                }
-//            }
+            // TODO: empty state (user has zero stories) - currently renders nothing
+        }
+    }
+
+    if (showAnalyticsSheet) {
+        ModalBottomSheet(onDismissRequest = { showAnalyticsSheet = false }) {
+            StoryAnalyticsSheetContent()
         }
     }
 
@@ -424,18 +284,10 @@ fun StoriesDetailPage(
 @Composable
 fun StoriesPager(
     stories: List<Story>,
-    storiesViewModel: StoriesViewModel,
     paddingValues: PaddingValues,
-    coroutineScope: CoroutineScope,
-    navController: NavHostController,
-    userPagerState: PagerState,
     storyPagerState: PagerState,
-    pageInteractionSource: MutableInteractionSource,
-    progress: Animatable<Float, AnimationVector1D>,
-//    onPause: () -> Unit,
-//    onResume: () -> Unit,
-//    onTapLeft: () -> Unit,
-//    onTapRight: () -> Unit
+    advanceStory: (Int) -> Unit,
+    onPressedChange: (Boolean) -> Unit,
 ) {
     //temporary fix for above race
     LaunchedEffect(stories){
@@ -444,201 +296,41 @@ fun StoriesPager(
         }.coerceAtLeast(0))
     }
 
-//    LaunchedEffect(storyPagerState.currentPage) {
-//        progress.snapTo(0f) // Immediately set progress to 0
-//    }
-
     HorizontalPager(
         state = storyPagerState,
         modifier = Modifier
-            .fillMaxSize()
-//            .pointerInput(Unit){
-//                               detectTapGestures(
-//                                   onPress = {
-//                                       onPause();
-//                                       tryAwaitRelease();
-//                                       onResume
-//                                   },
-//                                   onTap = {
-//                                       offset ->
-//                                       val screenWidth = size.width
-//                                       if(offset.x < screenWidth/3){
-//                                           onTapLeft()
-//                                       }else if(offset.x > 2*screenWidth/3){
-//                                           onTapRight
-//                                       }
-//                                   }
-//                               )
-//            }
-        ,
+            .fillMaxSize(),
         beyondViewportPageCount = 3,
         userScrollEnabled = false,
-
-        ) {
+    ) {
             storyIndex->
-        
 
         val currentStory = stories[storyIndex]
-        Column(
+        StoryContentCard(
+            storyDetails = currentStory.storyDetails,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
-//                .pointerInput(Unit){
-//                    detectTapGestures(
-//                        onPress = {
-//                            onPause();
-//                            tryAwaitRelease();
-//                            onResume
-//                        },
-//                        onTap = {
-//                                offset ->
-//                            val screenWidth = size.width
-//                            if(offset.x < screenWidth/3){
-//                                onTapLeft()
-//                            }else if(offset.x > 2*screenWidth/3){
-//                                onTapRight
-//                            }
-//                        }
-//                    )
-//                }
-//            ,
-                .pointerInput(pageInteractionSource) {
+                .pointerInput(Unit) {
                     detectTapGestures(
                         onPress = {
-//                            onPause()
+                            onPressedChange(true)
                             tryAwaitRelease()
-//                            onResume()
+                            onPressedChange(false)
                         },
                         onTap = { offset ->
                             val screenWidth = size.width
-                            coroutineScope.launch {
-                                if (offset.x < screenWidth / 3) {
-                                    // Tap Left: Move to previous story or previous user
-                                    if (storyPagerState.currentPage > 0) {
-                                        storyPagerState.animateScrollToPage(storyPagerState.currentPage - 1)
-                                    } else if (userPagerState.currentPage > 0) {
-                                        userPagerState.animateScrollToPage(userPagerState.currentPage - 1)
-                                    } else {
-                                        navController.navigateUp()
-                                    }
-                                } else if (offset.x > 2 * screenWidth / 3) {
-                                    // Tap Right: Move to next story or next user
-                                    if (storyPagerState.currentPage < storyPagerState.pageCount - 1) {
-                                        storyPagerState.animateScrollToPage(storyPagerState.currentPage + 1)
-                                    } else if (userPagerState.currentPage < userPagerState.pageCount - 1) {
-                                        userPagerState.animateScrollToPage(userPagerState.currentPage + 1)
-                                    } else {
-                                        navController.navigateUp()
-                                    }
-                                }
+                            when {
+                                // Tap left: previous story, bleeding into the previous user if needed
+                                offset.x < screenWidth / 3 -> advanceStory(-1)
+                                // Tap right: next story, bleeding into the next user if needed
+                                offset.x > 2 * screenWidth / 3 -> advanceStory(1)
                             }
                         }
                     )
-
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
-
-            Text(
-                modifier = Modifier.padding(vertical = 24.dp, horizontal = 8.dp),
-                text = currentStory.storyDetails,
-                style = StoryContentTextStyle,
-                textAlign = TextAlign.Left
-            )
-
-            Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.height(40.dp))
-
-        }
-    }
-}
-
-//@Composable
-//fun StoryDetailBottomBar(){
-//
-////    BottomAppBar(
-////        modifier = Modifier
-////            .fillMaxWidth(),
-////        tonalElevation = 4.dp
-////    ){
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 8.dp, horizontal = 12.dp)
-//        ) {
-//            TextField(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-////                .weight(1f)
-//                    .height(48.dp)
-//                    .clip(RoundedCornerShape(28.dp)),
-//                value = "Reply",
-//                onValueChange = {
-//                    //TODO
-//                },
-//                textStyle = TextStyle(fontSize = 14.sp),
-//                colors = TextFieldDefaults.colors(
-//                    // making underline invisible
-//                    disabledTextColor = Color.Transparent,
-//                    focusedIndicatorColor = Color.Transparent,
-//                    unfocusedIndicatorColor = Color.Transparent,
-//                    disabledIndicatorColor = Color.Transparent
-//                )
-//            )
-////        IconButton(
-////            onClick = { /*TODO*/ },
-////            modifier = Modifier
-////                .weight(0.13f) // Increases space for the emoji
-////                .padding(start = 4.dp)
-////                .clip(RoundedCornerShape(100.dp))
-////                .background(MaterialTheme.colorScheme.secondaryContainer)
-////        ) {
-////            Icon(
-////                painter = painterResource(id = R.drawable.baseline_insert_emoticon_24),
-////                contentDescription ="React",
-////                modifier = Modifier.size(35.dp),
-////                tint = MaterialTheme.colorScheme.onSecondaryContainer
-////            )
-////        }
-//        }
-//
-//
-////    }
-//
-//}
-
-
-@Composable
-fun ShimmerStory(paddingValues: PaddingValues) {
-    Column(
-        modifier = Modifier
-            .padding(paddingValues)
-            .padding(horizontal = 16.dp)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(24.dp))
-        Column() {
-            repeat(5) {
-                ShimmerLine(
-                    modifier = Modifier.padding(vertical = 6.dp, horizontal = 8.dp),
-                    height = 18.dp
-                )
-            }
-            ShimmerLine(
-                modifier = Modifier.padding(vertical = 6.dp, horizontal = 8.dp),
-                height = 18.dp,
-                widthFraction = 0.75f
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Divider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
+                }
+        )
     }
 }

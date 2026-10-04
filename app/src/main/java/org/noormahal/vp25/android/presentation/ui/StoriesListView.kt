@@ -60,7 +60,6 @@ fun StoriesListView(navController: NavHostController, storiesViewModel: StoriesV
 
     // dummy data for now, pending real data wiring
     val usersList = listOf(
-        User("Saji", "Sajidha Abdulla", true),
         User("sali", "Muhammed Salih", true),
         User("hahi", "Ravi", true),
         User("kiki", "Ahmed", false),
@@ -68,9 +67,9 @@ fun StoriesListView(navController: NavHostController, storiesViewModel: StoriesV
     )
 
     StoriesList(
-        myStoryUser = User("123", "Sajidha", hasUnviewedStory = false),
+        myStoryUser = User(CURRENT_USER_USERNAME, "Sajidha Abdulla", hasUnviewedStory = true),
         users = usersList,
-        onMyStoryClick = { /* navigate to my stories detail */ },
+        onMyStoryClick = { navController.navigate(Screen.StoriesDetail.createRoute(CURRENT_USER_USERNAME)) },
         onUserClick = { user -> navController.navigate(Screen.StoriesDetail.createRoute(user.userName)) }
     )
 }
