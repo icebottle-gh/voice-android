@@ -7,12 +7,13 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Users::class, Stories::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class VakkiDatabase : RoomDatabase() {
     //Register the DAO
     abstract fun StoriesDao(): StoriesDao
+    abstract fun UsersDao(): UsersDao
 
     companion object {
         @Volatile // Ensures visibility of this variable across threads

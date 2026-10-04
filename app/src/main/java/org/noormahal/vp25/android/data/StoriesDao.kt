@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 abstract class StoriesDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    abstract suspend fun addNewStory(story: Stories)
+    abstract suspend fun insertStories(stories: List<Stories>)
 
 //    //get all stories
 //    @Query("SELECT * FROM `STORIES-TABLE`")
@@ -22,12 +22,12 @@ abstract class StoriesDao {
     // also orderd by viewed or not - if user has even one unviewed
     // ordered by timeposted asc of their last story
     @Query("""
-                SELECT STORIES.userName, displayName,
+                SELECT STORIES.userName, COALESCE(displayName, fullName) AS displayName,
                     MAX(timePosted) AS latestStoryTime,
                     MIN(viewed)=0 AS hasUnviewedStory
-                FROM `STORIES-TABLE` AS STORIES 
-                JOIN `USERS-TABLE` AS USERS 
-                ON STORIES.userName=USERS.userName 
+                FROM `STORIES-TABLE` AS STORIES
+                JOIN `USERS-TABLE` AS USERS
+                ON STORIES.userName=USERS.userName
                 GROUP BY STORIES.userName,displayName
                 ORDER BY hasUnviewedStory DESC, latestStoryTime DESC
     """)
@@ -36,9 +36,9 @@ abstract class StoriesDao {
     //STORY LIST OF A SINGLE USER
     //userName, displayName, storyId, storyDetails, timePosted, viewed
     @Query("""
-        SELECT stories.userName, users.displayName, stories.storyId,stories.storyDetails, stories.timePosted, stories.viewed
-        FROM `stories-table` as stories 
-        JOIN `users-table` as users 
+        SELECT stories.userName, COALESCE(users.displayName, users.fullName) AS displayName, stories.storyId,stories.storyDetails, stories.timePosted, stories.viewed
+        FROM `stories-table` as stories
+        JOIN `users-table` as users
         ON stories.userName=users.userName
         WHERE stories.userName==:user
         ORDER BY timePosted ASC

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 
@@ -17,12 +18,15 @@ import kotlinx.parcelize.Parcelize
             onUpdate = ForeignKey.CASCADE,
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["remoteId"], unique = true)]
 )
 @Parcelize
 data class Stories(
     @PrimaryKey(autoGenerate = true)
     val storyId:Long=0,
+    @ColumnInfo
+    val remoteId: String,
     @ColumnInfo
     val userName: String,
     @ColumnInfo
