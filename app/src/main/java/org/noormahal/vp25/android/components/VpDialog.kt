@@ -37,24 +37,27 @@ fun VpDialog(
     modifier: Modifier = Modifier,
     title: String? = null,
     description: String? = null,
+    content: (@Composable () -> Unit)? = null,
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         VpDialogCard(
             buttons = buttons,
             modifier = modifier,
             title = title,
-            description = description
+            description = description,
+            content = content
         )
     }
 }
 
 
 @Composable
-private fun VpDialogCard(
+internal fun VpDialogCard(
     buttons: List<VpDialogButtonSpec>,
     modifier: Modifier = Modifier,
     title: String? = null,
     description: String? = null,
+    content: (@Composable () -> Unit)? = null,
 ) {
     Surface(
         modifier = modifier,
@@ -83,14 +86,20 @@ private fun VpDialogCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            content?.invoke()
 
             if (buttons.size <= 2) {
-                Row(horizontalArrangement = Arrangement.spacedBy(DIALOG_GAP)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(DIALOG_GAP)
+                ) {
                     buttons.forEach { button ->
                         VpButton(
                             label = { Text(button.text) },
                             onClick = button.onClick,
-                            style = button.style
+                            style = button.style,
+                            fullWidth = true,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -126,6 +135,31 @@ fun VpDialogTwoButtonPreview() {
                     VpDialogButtonSpec(text = "Button 1", onClick = {}, style = ButtonStyle.ROUND_PRIMARY_OUTLINE),
                     VpDialogButtonSpec(text = "Button 2", onClick = {}, style = ButtonStyle.ROUND_PRIMARY)
                 )
+            )
+        }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun VpDialogContentSlotPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            VpDialogCard(
+                title = "Edit Nickname",
+                buttons = listOf(
+                    VpDialogButtonSpec(text = "Cancel", onClick = {}, style = ButtonStyle.ROUND_PRIMARY_OUTLINE),
+                    VpDialogButtonSpec(text = "Save", onClick = {}, style = ButtonStyle.ROUND_PRIMARY)
+                ),
+                content = {
+                    VpTextField(
+                        value = "Buddy",
+                        onValueChange = {},
+                        placeholder = "Enter nickname or leave blank",
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             )
         }
     }

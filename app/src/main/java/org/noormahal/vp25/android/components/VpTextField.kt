@@ -28,8 +28,8 @@ private val NAME_ALLOWED_SYMBOLS = charArrayOf('\'', '-', '.')
 fun VpTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
     modifier: Modifier = Modifier,
+    label: String? = null,
     placeholder: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     enabled: Boolean = true,
@@ -53,7 +53,7 @@ fun VpTextField(
             }
             if (maxLength == null || filtered.length <= maxLength) onValueChange(filtered)
         },
-        label = { Text(text = label) },
+        label = label?.let { { Text(text = it) } },
         placeholder = placeholder?.let { { Text(text = it) } },
         modifier = modifier,
         singleLine = minLines <= 1,

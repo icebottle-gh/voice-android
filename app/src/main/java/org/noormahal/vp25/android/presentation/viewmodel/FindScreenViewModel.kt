@@ -92,6 +92,15 @@ class FindScreenViewModel(application: Application): AndroidViewModel(applicatio
     }
 
     fun setNetwork(network: Boolean) {
+        if (network == _network.value) return
         _network.value = network
+        // Everyone/Network are different result sets, not a refinement of the same
+        // query - clear immediately so the old tab's results don't linger while the
+        // new tab's search (debounced below) is in flight.
+        currentPage = 0
+        _searchResults.value = emptyList()
+        _hasMore.value = true
+        _error.value = null
+        _loading.value = true
     }
 }

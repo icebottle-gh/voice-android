@@ -1,9 +1,9 @@
 package org.noormahal.vp25.android.components
 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import android.content.res.Configuration
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.theme.VpTheme
 
 enum class FollowStatus { FOLLOW, FOLLOWING, REQUESTED }
@@ -47,29 +46,26 @@ fun FollowStatusButton(
 
     if (showConfirmDialog) {
         val isFollowing = status == FollowStatus.FOLLOWING
-        AlertDialog(
+        VpDialog(
             onDismissRequest = { showConfirmDialog = false },
-            title = { Text(if (isFollowing) "Unfollow?" else "Cancel request?") },
-            text = {
-                Text(
-                    if (isFollowing) "Are you sure you want to unfollow this person?"
-                    else "Are you sure you want to cancel your follow request?"
+            title = if (isFollowing) "Unfollow?" else "Cancel request?",
+            description = if (isFollowing) "Are you sure you want to unfollow this person?"
+                else "Are you sure you want to cancel your follow request?",
+            buttons = listOf(
+                VpDialogButtonSpec(
+                    text = "No",
+                    onClick = { showConfirmDialog = false },
+                    style = ButtonStyle.ROUND_PRIMARY_OUTLINE
+                ),
+                VpDialogButtonSpec(
+                    text = "Yes",
+                    onClick = {
+                        showConfirmDialog = false
+                        if (isFollowing) onUnfollow() else onCancelRequest()
+                    },
+                    style = ButtonStyle.ROUND_PRIMARY
                 )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showConfirmDialog = false
-                    if (isFollowing) onUnfollow() else onCancelRequest()
-                }) {
-                    Text("Yes")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showConfirmDialog = false }) {
-                    Text("No")
-                }
-            },
-            shape = RoundedCornerShape(10.dp)
+            )
         )
     }
 }
@@ -95,5 +91,23 @@ fun FollowStatusButtonFollowingPreview() {
 fun FollowStatusButtonRequestedPreview() {
     VpTheme{
         FollowStatusButton(status = FollowStatus.REQUESTED, onFollow = {}, onUnfollow = {}, onCancelRequest = {})
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun UnfollowConfirmDialogPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            VpDialogCard(
+                title = "Unfollow?",
+                description = "Are you sure you want to unfollow this person?",
+                buttons = listOf(
+                    VpDialogButtonSpec(text = "No", onClick = {}, style = ButtonStyle.ROUND_PRIMARY_OUTLINE),
+                    VpDialogButtonSpec(text = "Yes", onClick = {}, style = ButtonStyle.ROUND_PRIMARY)
+                )
+            )
+        }
     }
 }

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.noormahal.ib.vakkic.AppImpl
+import org.noormahal.ib.vakkic.User
 import org.noormahal.ib.vakkic.UserImpl
 import org.noormahal.ib.vakkic.enums.AccountState
 import org.noormahal.vp25.android.presentation.navigation.PostAuthDestination
@@ -24,6 +25,10 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
     private val _isLoadingSession = MutableStateFlow(true)
     val isLoadingSession: StateFlow<Boolean> = _isLoadingSession
+    private val _postAuthDestination = MutableStateFlow<PostAuthDestination?>(null)
+    val postAuthDestination: StateFlow<PostAuthDestination?> = _postAuthDestination
+    private val _setupMobile = MutableStateFlow<String?>(null)
+    val setupMobile: StateFlow<String?> = _setupMobile
     private val secretStore: EncryptedSecretStore = EncryptedSecretStore(application)
 
     private val _otp = mutableStateOf("")
@@ -68,18 +73,9 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
                     val user = Client.app.login(mobile, otp)
                     secretStore.setSecret(user.serialize())
                     Client.user = user
-                    val details = try {
-                        user.account().getDetails()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                    if (details == null) {
-                        PostAuthDestination.ACCOUNT_SETUP
-                    } else {
-                        AccountState.fromSerialized(details.accountState).toPostAuthDestination()
-                    }
+                    resolvePostAuthDestination(user, fallbackMobile = mobile)
                 }
+                _postAuthDestination.value = destination
                 setLoggedIn(true)
                 onSuccess(destination)
             } catch (e: Exception) {
@@ -95,6 +91,7 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
                 secretStore.clearSecret()
             }
             Client.user = null
+            _postAuthDestination.value = null
             setLoggedIn(false)
         }
     }
@@ -105,7 +102,9 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
                 try {
                     val secret = secretStore.getSecret()
                     if (secret != null) {
-                        Client.user = UserImpl.deserialize(secret, Client.app as AppImpl?)
+                        val user = UserImpl.deserialize(secret, Client.app as AppImpl?)
+                        Client.user = user
+                        _postAuthDestination.value = resolvePostAuthDestination(user)
                         setLoggedIn(true)
                     }
                 } catch (e: Exception) {
@@ -116,6 +115,21 @@ class LoginViewModel(application: Application): AndroidViewModel(application) {
                 }
             }
             setLoadingSession(false)
+        }
+    }
+
+    private suspend fun resolvePostAuthDestination(user: User, fallbackMobile: String? = null): PostAuthDestination {
+        val details = try {
+            withContext(Dispatchers.IO) { user.account().getDetails() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+        _setupMobile.value = details?.mobile ?: fallbackMobile
+        return if (details == null) {
+            PostAuthDestination.ACCOUNT_SETUP
+        } else {
+            AccountState.fromSerialized(details.accountState).toPostAuthDestination()
         }
     }
 }

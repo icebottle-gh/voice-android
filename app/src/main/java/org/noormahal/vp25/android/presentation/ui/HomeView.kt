@@ -140,7 +140,11 @@ private fun HomeScreen(
                     actions = when {
                         isPersonProfile -> emptyList()
                         isProfile -> listOf(
-                            VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Logout", onClick = onLogout)
+                            VpTopAppBarAction(
+                                icon = ImageVector.vectorResource(id = R.drawable.outline_logout_24),
+                                label = "Logout",
+                                onClick = onLogout
+                            )
                         )
                         else -> listOf(
                             VpTopAppBarAction(icon = Icons.Default.MoreVert, label = "Drop down item", onClick = { /*TODO*/ }),

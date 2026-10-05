@@ -16,16 +16,16 @@ import org.noormahal.vp25.android.presentation.navigation.toPostAuthDestination
 class AccountSetupViewModel : ViewModel() {
     private val _mobile = mutableStateOf("")
     val mobile: State<String> = _mobile
-    private val _isLoading = mutableStateOf(true)
-    val isLoading: State<Boolean> = _isLoading
     private val _isSubmitting = mutableStateOf(false)
     val isSubmitting: State<Boolean> = _isSubmitting
     private val _error = mutableStateOf<String?>(null)
     val error: State<String?> = _error
 
+    // Runs as a background refresh, not a blocking load - the screen already has a mobile
+    // number to show from login (see AccountSetupView's initialMobile). A failure here shouldn't
+    // surface as a form error since nothing the user did caused it and nothing is actually broken.
     fun loadAccountDetails() {
         viewModelScope.launch {
-            _isLoading.value = true
             try {
                 val details = withContext(Dispatchers.IO) {
                     Client.user!!.account().getDetails()
@@ -34,9 +34,6 @@ class AccountSetupViewModel : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 Client.reportIfUnauthorized(e)
-                _error.value = e.message ?: "Something went wrong. Please try again."
-            } finally {
-                _isLoading.value = false
             }
         }
     }

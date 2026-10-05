@@ -18,16 +18,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,15 +58,16 @@ fun PersonProfile(
 ) {
     var showEditNicknameDialog by remember { mutableStateOf(false) }
     var showEditBioDialog by remember { mutableStateOf(false) }
-    val showLoadingSpinner = rememberDelayedLoading(isLoading)
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize()) {
         when {
-            showLoadingSpinner -> {
-                CircularProgressIndicator()
+            isLoading -> {
+                ProfileSkeleton(modifier = Modifier.fillMaxSize())
             }
             error != null -> {
-                Text("Error: ${error}", color = MaterialTheme.colorScheme.error)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Error: ${error}", color = MaterialTheme.colorScheme.error)
+                }
             }
             profile != null -> {
                 ProfileContent(
@@ -86,9 +82,6 @@ fun PersonProfile(
                     onEditNicknameClick = { showEditNicknameDialog = true },
                     onEditBioClick = { showEditBioDialog = true }
                 )
-            }
-            else -> {
-                Text("Profile not found or still loading.")
             }
         }
     }
@@ -113,6 +106,46 @@ fun PersonProfile(
                 showEditBioDialog = false
             }
         )
+    }
+}
+@Composable
+private fun ProfileSkeleton(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ShimmerCircle(size = 84.dp)
+            Spacer(modifier = Modifier.height(12.dp))
+            ShimmerLine(widthFraction = 0.4f, height = 22.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+            ShimmerLine(widthFraction = 0.3f, height = 14.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Column(modifier = Modifier.padding(horizontal = VpSpacing.screenHorizontal)) {
+            ShimmerLine(height = 14.dp)
+            Spacer(modifier = Modifier.height(6.dp))
+            ShimmerLine(widthFraction = 0.8f, height = 14.dp)
+            Spacer(modifier = Modifier.height(6.dp))
+            ShimmerLine(widthFraction = 0.6f, height = 14.dp)
+        }
+    }
+}
+
+// Previews ProfileSkeleton directly rather than through PersonProfile(isLoading = true, ...) -
+// that path is gated behind rememberDelayedLoading's 300ms delay, which a static preview isn't
+// guaranteed to wait out, so it can render blank.
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ProfileSkeletonPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ProfileSkeleton(modifier = Modifier.fillMaxSize())
+        }
     }
 }
 
@@ -365,29 +398,25 @@ fun EditNicknameDialog(
 ) {
     var nicknameInput by remember { mutableStateOf(currentNickname ?: "") }
 
-    AlertDialog(
+    VpDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Nickname") },
-        text = {
-            OutlinedTextField(
+        title = "Edit Nickname",
+        content = {
+            VpTextField(
                 value = nicknameInput,
                 onValueChange = { nicknameInput = it },
-                label = { Text("Nickname (optional)") },
-                placeholder = { Text("Enter nickname or leave blank") },
+                placeholder = "Enter nickname or leave blank",
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
             )
         },
-        confirmButton = {
-            Button(onClick = { onConfirm(nicknameInput.takeIf { it.isNotBlank() }) }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
+        buttons = listOf(
+            VpDialogButtonSpec(text = "Cancel", onClick = onDismiss, style = ButtonStyle.ROUND_PRIMARY_OUTLINE),
+            VpDialogButtonSpec(
+                text = "Save",
+                onClick = { onConfirm(nicknameInput.takeIf { it.isNotBlank() }) },
+                style = ButtonStyle.ROUND_PRIMARY
+            )
+        )
     )
 }
 
@@ -399,30 +428,27 @@ fun EditBioDialog(
 ) {
     var bioInput by remember { mutableStateOf(currentBio ?: "") }
 
-    AlertDialog(
+    VpDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (currentBio.isNullOrBlank()) "Add Bio" else "Edit Bio") },
-        text = {
-            OutlinedTextField(
+        title = if (currentBio.isNullOrBlank()) "Add Bio" else "Edit Bio",
+        content = {
+            VpTextField(
                 value = bioInput,
                 onValueChange = { bioInput = it },
-                label = { Text("Bio") },
-                placeholder = { Text("Tell people about yourself") },
+                label = "Bio",
+                placeholder = "Tell people about yourself",
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
-                maxLines = 6
             )
         },
-        confirmButton = {
-            Button(onClick = { onConfirm(bioInput.takeIf { it.isNotBlank() }) }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
+        buttons = listOf(
+            VpDialogButtonSpec(text = "Cancel", onClick = onDismiss, style = ButtonStyle.ROUND_PRIMARY_OUTLINE),
+            VpDialogButtonSpec(
+                text = "Save",
+                onClick = { onConfirm(bioInput.takeIf { it.isNotBlank() }) },
+                style = ButtonStyle.ROUND_PRIMARY
+            )
+        )
     )
 }
 
