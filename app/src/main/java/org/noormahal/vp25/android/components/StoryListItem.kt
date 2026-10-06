@@ -40,19 +40,30 @@ import org.noormahal.vp25.android.theme.VpTheme
 fun StoryListItem(
     user: User,
     isMyStory: Boolean = false,
+    // Only meaningful when isMyStory - whether you have a story at all, independent of
+    // user.hasUnviewedStory (which, for your own row, now means the same real thing it
+    // means for everyone else: have you opened your own story yet). The two used to be
+    // the same flag (hasUnviewedStory was forced true whenever a story existed), which
+    // meant opening your own story would turn "Your Story" into "Add Story" - wrong,
+    // you still have a story, you've just seen it.
+    hasOwnStory: Boolean = true,
     onAddStoryClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
     val cardTitle = if (isMyStory) {
-        if (user.hasUnviewedStory) "My Story" else "Add Story"
+        if (hasOwnStory) "Your Story" else "Add Story"
     } else {
         user.displayName
     }
 
-    val borderColor = if (isMyStory || user.hasUnviewedStory)
-        MaterialTheme.colorScheme.primary
-    else
-        MaterialTheme.colorScheme.outlineVariant
+    // Primary means "something needs attention" - an unviewed story (yours or someone
+    // else's), or your own missing one (prompting you to post). Grey means nothing to
+    // act on - already viewed, mine or theirs alike.
+    val borderColor = when {
+        isMyStory && !hasOwnStory -> MaterialTheme.colorScheme.primary
+        user.hasUnviewedStory -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.outlineVariant
+    }
 
     Card(
         modifier = Modifier
@@ -61,7 +72,7 @@ fun StoryListItem(
             .clip(RoundedCornerShape(10.dp))
             .clickable { onClick() }
             .then(
-                if (isMyStory && !user.hasUnviewedStory) {
+                if (isMyStory && !hasOwnStory) {
                     Modifier.drawBehind {
                         val strokeWidth = 3.dp.toPx()
                         val dashLength = 10f

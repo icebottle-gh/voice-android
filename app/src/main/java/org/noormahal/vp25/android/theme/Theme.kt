@@ -38,6 +38,15 @@ private val DarkColorScheme = darkColorScheme(
 
     surfaceTint = OrangeBlack800,
 
+    // Material3's newer tonal-elevation surface roles - unset, these silently fall
+    // back to M3's own baseline (purple) tones instead of this app's palette, which
+    // is what made the pull-to-refresh indicator's container look purple.
+    surfaceContainerLowest = OrangeBlack900,
+    surfaceContainerLow = OrangeBlack800,
+    surfaceContainer = OrangeBlack700,
+    surfaceContainerHigh = OrangeBlack600,
+    surfaceContainerHighest = OrangeBrown,
+
     error = darkRed,
     onError = onDarkRed,
     outline = GreyA700
@@ -71,7 +80,15 @@ private val LightColorScheme = lightColorScheme(
     onSecondaryContainer = OrangeBlack800,
 
     surfaceTint = White,
-    outline = GreyA400
+    outline = GreyA400,
+
+    // Same gap as the dark scheme above - these roles were unset, so they fell
+    // back to M3's own baseline (purple) tones instead of this app's palette.
+    surfaceContainerLowest = White,
+    surfaceContainerLow = OrangeWhite,
+    surfaceContainer = OrangeLight,
+    surfaceContainerHigh = Orange50,
+    surfaceContainerHighest = Orange100
 
 //    outline = GreyA400,         // Dividers, borders
 //    error = Color(0xFFB00020),

@@ -8,22 +8,38 @@ class StoriesRepository(
     private val storiesDao: StoriesDao,
     private val usersDao: UsersDao
 ) {
-    fun getStoryListUsers(): Flow<List<User>> = storiesDao.getStoryListUsers()
-    fun getStoriesOfUser(user:String): List<Story> = storiesDao.getStoriesofUser(user)
+    private fun expiryCutoffMillis() = System.currentTimeMillis() - STORY_LIFETIME_MILLIS
+
+    fun getStoryListUsers(): Flow<List<User>> = storiesDao.getStoryListUsers(expiryCutoffMillis())
+    fun getStoriesOfUser(user:String): List<Story> = storiesDao.getStoriesofUser(user, expiryCutoffMillis())
 
     fun markStoryAsViewed( storyId: Long){
         storiesDao.markStoryAsViewed( storyId = storyId)
     }
 
     suspend fun upsertUsers(users: List<Users>) = usersDao.upsertAll(users)
-    suspend fun insertStories(stories: List<Stories>) = storiesDao.insertStories(stories)
+
+    suspend fun insertStories(stories: List<Stories>) {
+        // Opportunistic cleanup: piggyback on the one place new stories already
+        // arrive, rather than standing up a separate periodic job for this.
+        storiesDao.deleteStoriesOlderThan(expiryCutoffMillis())
+        storiesDao.insertStories(stories)
+    }
+
+    suspend fun clearSeededDummyStories() = storiesDao.clearSeededDummyStories()
 
 }
 
+private const val STORY_LIFETIME_MILLIS = 24 * 60 * 60 * 1000L
+
+// TODO: durationSeconds is a placeholder - the backend doesn't send it yet.
+// Switch to the real value (likely a "durationSeconds" key alongside the
+// story) once that lands; flag this in the PR if it hasn't by then.
 fun org.noormahal.ib.vakkic.dto.Story.toEntity(): Stories = Stories(
     remoteId = id,
     userName = user,
     storyDetails = text,
+    durationSeconds = 5,
     timePosted = createAt.time,
 )
 

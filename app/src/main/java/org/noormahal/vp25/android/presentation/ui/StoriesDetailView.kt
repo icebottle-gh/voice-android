@@ -1,9 +1,10 @@
 package org.noormahal.vp25.android.presentation.ui
 
 import android.app.Activity
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import android.content.Context
+import android.content.res.Configuration
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,35 +14,36 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import org.noormahal.vp25.android.R
+import org.noormahal.vp25.android.common.CURRENT_USER_USERNAME
 import org.noormahal.vp25.android.components.FabStyle
 import org.noormahal.vp25.android.components.ShimmerStory
 import org.noormahal.vp25.android.components.StoriesTopBar
@@ -51,8 +53,9 @@ import org.noormahal.vp25.android.components.VpFab
 import org.noormahal.vp25.android.data.Story
 import org.noormahal.vp25.android.data.User
 import org.noormahal.vp25.android.presentation.viewmodel.StoriesViewModel
-import kotlinx.coroutines.CoroutineScope
-
+import org.noormahal.vp25.android.theme.VpTheme
+import java.util.Calendar
+import java.util.Date
 
 @Composable
 fun StoriesDetail(userName: String, storiesViewModel: StoriesViewModel, navController: NavHostController) {
@@ -80,145 +83,109 @@ fun StoriesDetail(userName: String, storiesViewModel: StoriesViewModel, navContr
         }
     }
 
-    // dummy data for now, pending real backend wiring
-    // (storiesViewModel.startStorySession() above already populates storySessionUsers/userStoriesMap for real)
-    val storySessionUserList = listOf(
-        User("saji", "Sajidha Abdulla", true),
-        User("sali", "Muhammed Salih", true),
-        User("hahi", "Hahahahahha", true),
-        User("kiki", "Kiki Kuku", false),
-        User("chuchu","Chuchu",false)
-    )
-
-    val storySessionStoriesMap = mutableMapOf<String, StoriesViewModel.StoriesListState>(
-        "saji" to StoriesViewModel.StoriesListState(
-            false,
-            listOf(
-                Story("Saji", "Sajidha Abdulla", 1, "Hi", 1, true),
-                Story("Saji", "Sajidha Abdulla", 2, "Lorem Ipsum is simply dummy text.", 2, false),
-                Story(
-                    "Saji",
-                    "Sajidha Abdulla",
-                    3,
-                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry.Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line in section 1.10.32. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-                    3,
-                    false
-                ),
-                Story(
-                    "Saji",
-                    "Sajidha Abdulla",
-                    4,
-                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ",
-                    20,
-                    false
-                ),
-            )
-        ),
-        "sali" to StoriesViewModel.StoriesListState(
-            false,
-            listOf(
-                Story("sali","Muhammed Salih", 5, "There are many variations",2, false),
-                Story("sali","Muhammed Salih", 6, "The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33",18, false)
-
-            )
-        ),
-        "hahi" to StoriesViewModel.StoriesListState(
-            false,
-            listOf(
-                Story("hahi","Haha", 7, "A",7,true),
-                Story("hahi","Haha", 8, "B",8,true),
-                Story("hahi","Haha", 9, "C",9,false),
-                Story("hahi","Haha", 10, "D",10,false),
-                Story("hahi","Haha", 11, "E",11,false),
-            )
-        ),
-        "kiki" to StoriesViewModel.StoriesListState(
-            false,
-            listOf(
-                Story("kiki","Kiki",12, "Hey seen",8, true)
-            )
-        ),
-        "chuchu" to StoriesViewModel.StoriesListState(
-            false,
-            listOf(
-                Story("chuchu","Chuchu",13,"Hey seen too",9,false)
-            )
-        ),
-    )
+    val storySessionUserList by storiesViewModel.storySessionUsers.collectAsState()
+    val userStoriesMap by storiesViewModel.userStoriesMap.collectAsState()
 
 
-    val userPagerState = rememberPagerState(
-        //0 when opening first few times after opening the app. Kinda Race condition
-        initialPage = storySessionUserList.indexOfFirst { it.userName == userName }.coerceAtLeast(0),
-        pageCount = { storySessionUserList.size }
-    )
-    //temporary fix for above race.
-    LaunchedEffect(storySessionUserList){
-        userPagerState.scrollToPage(storySessionUserList.indexOfFirst { it.userName == userName }.coerceAtLeast(0))
+    if (storySessionUserList.isEmpty() || !storySessionUserList.all { userStoriesMap.containsKey(it.userName) }) {
+        ShimmerStory(PaddingValues())
+        return
     }
 
-    val coroutineScope = rememberCoroutineScope()
-
-    HorizontalPager(
-        state = userPagerState
-    ){
-            userIndex ->
-        var user = storySessionUserList[userIndex]
-
-        val storiesState = storySessionStoriesMap[user.userName]?: StoriesViewModel.StoriesListState()
-        StoriesDetailPage(
-            user = user,
-            // TODO: replace with the real current-user id once auth/session state is wired here
-            isMyStory = user.userName == CURRENT_USER_USERNAME,
-            storiesState = storiesState,
-            storiesViewModel = storiesViewModel,
-            navController = navController,
-            coroutineScope = coroutineScope,
-            userPagerState = userPagerState
-        )
-
+    val slides = remember(storySessionUserList, userStoriesMap) {
+        storySessionUserList.flatMap { user ->
+            val state = userStoriesMap[user.userName]
+            // A user whose fetch failed contributes no slides - there's nothing
+            // useful to show for them, and no retry UI exists today anyway.
+            if (state == null || state.error != null) emptyList()
+            else state.storiesList.map { story -> StorySlide(user, story) }
+        }
     }
 
+    if (slides.isEmpty()) {
+        // Every session user's fetch failed - nothing to show.
+        LaunchedEffect(Unit) { navController.navigateUp() }
+        return
+    }
+
+    val initialIndex = remember(slides) {
+        slides.indexOfFirst { it.user.userName == userName && !it.story.viewed }
+            .let { if (it >= 0) it else slides.indexOfFirst { slide -> slide.user.userName == userName } }
+            .coerceAtLeast(0)
+    }
+
+    StoriesDetailScreen(
+        slides = slides,
+        initialIndex = initialIndex,
+        navController = navController,
+        onStoryViewed = storiesViewModel::markStoryAsViewed
+    )
 }
 
-const val CURRENT_USER_USERNAME = "saji"
+private fun formatStoryTimePosted(context: Context, timePostedMillis: Long): String {
+    val now = Calendar.getInstance()
+    val posted = Calendar.getInstance().apply { timeInMillis = timePostedMillis }
+    val yesterday = (now.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, -1) }
+
+    val dayLabel = when {
+        isSameDay(posted, now) -> "Today"
+        isSameDay(posted, yesterday) -> "Yesterday"
+        // Stories only live 24h, so this shouldn't normally be reached.
+        else -> android.text.format.DateFormat.getDateFormat(context).format(Date(timePostedMillis))
+    }
+    val time = android.text.format.DateFormat.getTimeFormat(context).format(Date(timePostedMillis))
+    return "$dayLabel, $time"
+}
+
+private fun isSameDay(a: Calendar, b: Calendar): Boolean =
+    a.get(Calendar.YEAR) == b.get(Calendar.YEAR) && a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR)
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun StoriesDetailPage(
-    storiesState: StoriesViewModel.StoriesListState,
-    user: User,
-    isMyStory: Boolean,
-    storiesViewModel: StoriesViewModel,
+private fun StoriesDetailScreen(
+    slides: List<StorySlide>,
+    initialIndex: Int,
     navController: NavHostController,
-    coroutineScope: CoroutineScope,
-    userPagerState: PagerState
-){
-
-    val playerState = rememberStoryPlayerState(
-        storyCount = storiesState.storiesList.size,
-        initialPage = storiesState.storiesList.indexOfFirst { story -> !story.viewed }.coerceAtLeast(0),
-        userPagerState = userPagerState,
-        coroutineScope = coroutineScope,
+    onStoryViewed: (story: Story, reportToBackend: Boolean) -> Unit
+) {
+    val playerState = rememberStorySessionState(
+        slides = slides,
+        initialIndex = initialIndex,
         onExhausted = { navController.navigateUp() }
     )
 
-    // TODO: mark the settled story as viewed once real data wiring lands (storiesViewModel.markStoryAsViewed)
-
     var showAnalyticsSheet by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val currentSlide = slides[playerState.currentIndex]
+    val isMyStory = currentSlide.user.userName == CURRENT_USER_USERNAME
+
+    // Mark as settled-current slide viewed - guarded on the flag itself so resuming a
+    // story you've already seen (e.g. swiping back to a user mid-session) doesn't write
+    // the same update over and over. Only report to the backend for other users'
+    // stories - there's nothing meaningful to report when you view your own.
+    LaunchedEffect(playerState.currentIndex) {
+        if (!currentSlide.story.viewed) {
+            onStoryViewed(currentSlide.story, !isMyStory)
+        }
+    }
+
+    val currentUserPos = playerState.userStartIndices.indexOfLast { it <= playerState.currentIndex }.coerceAtLeast(0)
+    val userStart = playerState.userStartIndices[currentUserPos]
+    val userEnd = playerState.userStartIndices.getOrElse(currentUserPos + 1) { slides.size }
 
     Scaffold(
         topBar = {
             StoriesTopBar(
-                username = user.userName,
-                timePosted = "Yesterday, 10:45 pm",
-                storyCount = storiesState.storiesList.size,
-                storyIndex = playerState.storyPagerState.currentPage,
+                username = if (isMyStory) "Your Story" else currentSlide.user.displayName,
+                timePosted = formatStoryTimePosted(context, currentSlide.story.timePosted),
+                storyCount = userEnd - userStart,
+                storyIndex = playerState.currentIndex - userStart,
                 timeProgress = playerState.progress.value
             ) {
                 navController.navigateUp()
             }
-         },
+        },
         // TODO: uncomment once replying to a story has backend support
         // bottomBar = {
         //     if (!isMyStory) {
@@ -231,7 +198,12 @@ fun StoriesDetailPage(
                 VpFab(
                     icon = ImageVector.vectorResource(id = R.drawable.outline_bar_chart_24),
                     contentDescription = "View story analytics",
-                    onClick = { showAnalyticsSheet = true },
+                    onClick = {
+                        showAnalyticsSheet = true
+                        // Same pause mechanism as press-and-hold - the sheet covers the
+                        // story, so auto-advance shouldn't keep running underneath it.
+                        playerState.setPressed(true)
+                    },
                     modifier = Modifier.padding(bottom = 24.dp),
                     style = FabStyle.ROUND_SECONDARY
                 )
@@ -240,97 +212,126 @@ fun StoriesDetailPage(
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
     ) { paddingValues ->
-        // Use a when statement to handle the different states of the stories data.
-        when {
-
-            storiesState.loading -> {
-                ShimmerStory(paddingValues)
-            }
-
-            storiesState.error != null -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text("Error: ${storiesState.error}")
-                }
-            }
-
-            storiesState.storiesList.isNotEmpty() -> {
-                StoriesPager(
-                    stories = storiesState.storiesList,
-                    paddingValues = paddingValues,
-                    storyPagerState = playerState.storyPagerState,
-                    advanceStory = playerState::advanceStory,
-                    onPressedChange = playerState::setPressed
-                )
-            }
-
-            // TODO: empty state (user has zero stories) - currently renders nothing
-        }
+        StorySlidesPager(
+            slides = slides,
+            paddingValues = paddingValues,
+            playerState = playerState
+        )
     }
 
     if (showAnalyticsSheet) {
-        ModalBottomSheet(onDismissRequest = { showAnalyticsSheet = false }) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showAnalyticsSheet = false
+                playerState.setPressed(false)
+            }
+        ) {
             StoryAnalyticsSheetContent()
         }
     }
-
 }
 
 @Composable
-fun StoriesPager(
-    stories: List<Story>,
+private fun StorySlidesPager(
+    slides: List<StorySlide>,
     paddingValues: PaddingValues,
-    storyPagerState: PagerState,
-    advanceStory: (Int) -> Unit,
-    onPressedChange: (Boolean) -> Unit,
+    playerState: StorySessionPlayerState
 ) {
-    //temporary fix for above race
-    LaunchedEffect(stories){
-        storyPagerState.scrollToPage(stories.indexOfFirst {story->
-            !story.viewed
-        }.coerceAtLeast(0))
-    }
-
     HorizontalPager(
-        state = storyPagerState,
-        modifier = Modifier
-            .fillMaxSize(),
-        beyondViewportPageCount = 3,
+        state = playerState.pagerState,
+        modifier = Modifier.fillMaxSize(),
+        beyondViewportPageCount = 1,
         userScrollEnabled = false,
-    ) {
-            storyIndex->
-
-        val currentStory = stories[storyIndex]
+    ) { index ->
+        val slide = slides[index]
         StoryContentCard(
-            storyDetails = currentStory.storyDetails,
+            storyDetails = slide.story.storyDetails,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
                 .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
-                            onPressedChange(true)
-                            tryAwaitRelease()
-                            onPressedChange(false)
-                        },
-                        onTap = { offset ->
+                    val tapSlopPx = 18.dp.toPx()
+                    val swipeUserThresholdPx = 56.dp.toPx()
+                    val longPressThresholdMillis = 200L
+                    awaitEachGesture {
+                        val down = awaitFirstDown()
+                        playerState.setPressed(true)
+                        var totalDragX = 0f
+                        var isDrag = false
+                        var lastChange = down
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            totalDragX += change.positionChange().x
+                            if (!isDrag && kotlin.math.abs(totalDragX) > tapSlopPx) {
+                                isDrag = true
+                            }
+                            if (isDrag) {
+                                change.consume()
+                            }
+                            lastChange = change
+                            if (!change.pressed) break
+                        }
+                        playerState.setPressed(false)
+                        val heldMillis = lastChange.uptimeMillis - down.uptimeMillis
+                        if (isDrag) {
+                            when {
+                                totalDragX > swipeUserThresholdPx -> playerState.jumpToUser(-1)
+                                totalDragX < -swipeUserThresholdPx -> playerState.jumpToUser(1)
+                            }
+                        } else if (heldMillis < longPressThresholdMillis) {
                             val screenWidth = size.width
                             when {
-                                // Tap left: previous story, bleeding into the previous user if needed
-                                offset.x < screenWidth / 3 -> advanceStory(-1)
-                                // Tap right: next story, bleeding into the next user if needed
-                                offset.x > 2 * screenWidth / 3 -> advanceStory(1)
+                                down.position.x < screenWidth / 3 -> playerState.advance(-1)
+                                down.position.x > 2 * screenWidth / 3 -> playerState.advance(1)
                             }
                         }
-                    )
+                    }
                 }
         )
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun StoriesDetailScreenPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            val user = User("saji", "Sajidha Abdulla")
+            StoriesDetailScreen(
+                slides = listOf(
+                    StorySlide(
+                        user, Story(
+                            userName = "saji",
+                            displayName = "Sajidha Abdulla",
+                            storyId = 1,
+                            remoteId = "preview-1",
+                            storyDetails = "Just got back from the best hike of my life. The view at the top was unreal.",
+                            durationSeconds = 5,
+                            timePosted = System.currentTimeMillis(),
+                            viewed = true
+                        )
+                    ),
+                    StorySlide(
+                        user, Story(
+                            userName = "saji",
+                            displayName = "Sajidha Abdulla",
+                            storyId = 2,
+                            remoteId = "preview-2",
+                            storyDetails = "One more thing!",
+                            durationSeconds = 5,
+                            timePosted = System.currentTimeMillis(),
+                            viewed = false
+                        )
+                    )
+                ),
+                initialIndex = 1,
+                navController = rememberNavController(),
+                onStoryViewed = { _, _ -> }
+            )
+        }
     }
 }

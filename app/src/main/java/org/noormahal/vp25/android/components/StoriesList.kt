@@ -19,6 +19,7 @@ private const val LOADING_SKELETON_COUNT = 10
 @Composable
 fun StoriesList(
     myStoryUser: User,
+    hasOwnStory: Boolean,
     users: List<User>,
     onMyStoryClick: () -> Unit,
     onUserClick: (User) -> Unit,
@@ -45,6 +46,7 @@ fun StoriesList(
                 StoryListItem(
                     user = myStoryUser,
                     isMyStory = true,
+                    hasOwnStory = hasOwnStory,
                     onAddStoryClick = onAddStoryClick,
                     onClick = onMyStoryClick
                 )
@@ -65,7 +67,8 @@ fun StoriesListPreview() {
     VpTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             StoriesList(
-                myStoryUser = User("123", "Sajidha", hasUnviewedStory = false),
+                myStoryUser = User("123", "Sajidha", hasUnviewedStory = true),
+                hasOwnStory = true,
                 users = listOf(
                     User("Saji", "Sajidha Abdulla", true),
                     User("sali", "Muhammed Salih", true),
@@ -88,6 +91,7 @@ fun StoriesListLoadingPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             StoriesList(
                 myStoryUser = User("123", "Sajidha", hasUnviewedStory = false),
+                hasOwnStory = false,
                 users = emptyList(),
                 onMyStoryClick = {},
                 onUserClick = {},

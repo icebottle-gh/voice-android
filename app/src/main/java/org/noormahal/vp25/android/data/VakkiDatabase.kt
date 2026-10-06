@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Users::class, Stories::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class VakkiDatabase : RoomDatabase() {
