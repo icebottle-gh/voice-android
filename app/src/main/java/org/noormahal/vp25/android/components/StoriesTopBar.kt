@@ -1,25 +1,21 @@
 package org.noormahal.vp25.android.components
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -27,27 +23,33 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.noormahal.vp25.android.R
+import org.noormahal.vp25.android.theme.VpSpacing
 import org.noormahal.vp25.android.theme.VpTheme
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StoriesTopBar(
     username: String,
-    timePosted: String,
-    storyCount: Int,
-    storyIndex: Int,
-    timeProgress: Float,
-    onReportClick: () -> Unit = {},
-    onMuteClick: () -> Unit = {},
-    onBlockClick: () -> Unit = {},
+    timePosted: String?,
+    storyCount: Int?,
+    storyIndex: Int?,
+    timeProgress: Float?,
     onBackClick: () -> Unit = {}
 ) {
-    var expanded by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 2.dp, vertical = 4.dp)
+            .windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility)
+            .padding(horizontal = 2.dp, vertical = 0.dp)
     ) {
-        VpStoriesProgressIndicator(storyCount, storyIndex, timeProgress)
+        // Nothing to show a progress bar for yet while the story data is still loading -
+        // show a shimmer at the same height instead of made-up zero values, so the top
+        // bar doesn't change height (and everything below it jump) once it loads.
+        if (storyCount != null && storyIndex != null && timeProgress != null) {
+            VpStoriesProgressIndicator(storyCount, storyIndex, timeProgress)
+        } else {
+            ShimmerBox(height = 4.dp)
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -65,35 +67,25 @@ fun StoriesTopBar(
                     text = username,
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.heightIn(max = 30.dp),
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(text = timePosted, style = MaterialTheme.typography.labelSmall)
+                // Shimmer placeholder while the current story's timestamp isn't known yet
+                // (loading/error) - a blank line here would leave this row's height
+                // intact but let the name above jump the instant real text appears.
+                if (timePosted != null) {
+                    Text(text = timePosted, style = MaterialTheme.typography.labelSmall)
+                } else {
+                    ShimmerLine(widthFraction = 0.4f, height = 12.dp)
+                }
             }
 
-            Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
-                IconButton(onClick = { expanded = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_more_vert_24),
-                        contentDescription = "Options"
-                    )
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Report") },
-                        onClick = { expanded = false; onReportClick() }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Mute") },
-                        onClick = { expanded = false; onMuteClick() }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Block") },
-                        onClick = { expanded = false; onBlockClick() }
-                    )
-                }
+            // TODO: wire up report/mute/block once those features exist
+            IconButton(onClick = {}) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_more_vert_24),
+                    contentDescription = "Options"
+                )
             }
         }
     }
@@ -111,6 +103,24 @@ fun StoriesTopBarPreview() {
                 storyCount = 5,
                 storyIndex = 3,
                 timeProgress = 0.2f
+            )
+        }
+    }
+}
+
+// Loading state: story data hasn't arrived yet, so there's nothing to show a progress bar for.
+@Preview(name = "Loading - Light", showBackground = true)
+@Preview(name = "Loading - Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun StoriesTopBarLoadingPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            StoriesTopBar(
+                username = "Sajidha Abdulla",
+                timePosted = null,
+                storyCount = null,
+                storyIndex = null,
+                timeProgress = null
             )
         }
     }

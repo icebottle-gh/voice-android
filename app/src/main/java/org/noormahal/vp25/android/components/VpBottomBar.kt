@@ -30,11 +30,6 @@ import org.noormahal.vp25.android.presentation.navigation.Screen
 import org.noormahal.vp25.android.presentation.navigation.screensWithBottom
 import org.noormahal.vp25.android.theme.VpTheme
 
-/**
- * NavigationBarItem hardcodes rememberRipple() rather than reading LocalIndication, so the
- * ripple can only be suppressed via RippleTheme. Scoped locally so back buttons/other ripples
- * elsewhere in the app are unaffected.
- */
 private object NoRippleTheme : RippleTheme {
     @Composable
     override fun defaultColor(): Color = Color.Unspecified
@@ -46,7 +41,6 @@ private object NoRippleTheme : RippleTheme {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VpBottomBar(
-    currentScreen: Screen,
     currentRoute: String?,
     items: List<Screen.BottomScreen>,
     onBottomScreenClick: (Screen) -> Unit
@@ -54,15 +48,11 @@ fun VpBottomBar(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    if(currentScreen in items){
-        val topOutlineColor = MaterialTheme.colorScheme.outline
-        CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
+    val topOutlineColor = MaterialTheme.colorScheme.outline
+    CompositionLocalProvider(LocalRippleTheme provides NoRippleTheme) {
         NavigationBar(
             containerColor = MaterialTheme.colorScheme.background,
             tonalElevation = 0.dp,
-            // Extra horizontal inset on top of the default system-bar insets, so the items
-            // sit closer together instead of spreading edge to edge - the bar's own
-            // background stays full width, only the item row is padded in.
             windowInsets = NavigationBarDefaults.windowInsets.add(WindowInsets(left = 24.dp, right = 24.dp)),
             modifier = Modifier
                 .drawBehind {
@@ -117,7 +107,6 @@ fun VpBottomBar(
 
                 )
             }
-        }
         }
     }
 }

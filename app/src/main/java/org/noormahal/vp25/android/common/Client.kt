@@ -9,6 +9,11 @@ import org.noormahal.ib.vakkic.AppImpl
 import org.noormahal.ib.vakkic.ErrorCode
 import org.noormahal.ib.vakkic.User
 
+// TODO: replace with the real signed-in user's own username/id once auth/session state
+// resolves it (requires an account().getDetails()-style call, not a synchronous property
+// on Client.user) - this is a placeholder standing in for that everywhere it's needed.
+const val CURRENT_USER_USERNAME = "saji"
+
 object Client {
     var app: App = AppImpl("https://ib-service.noormahal.org/ib-api/vakki", "9ciBrYwZePyjgDnutVoaDci9LGiHy6uJKV")
     var user: User? = null
