@@ -77,9 +77,7 @@ sealed class Screen(val title: String, val route: String){
         fun createRoute(userId: String) = "stories_detail/$userId"
     }
 
-//    object StoriesDetailPage : Screen("Story", "stories_detail/{storyId}"){
-//        fun createRoute(storyId: Long) = "stories_detail/$storyId"
-//    }
+    object NewStory : Screen("Add New Story", "new_story_route")
 
     object PersonProfile : Screen("", "profile/{userId}"){
         fun createRoute(userId: String) = "profile/$userId"
@@ -95,20 +93,4 @@ val screensWithBottom = listOf(
     // Screen.BottomScreen.Chats,
     Screen.BottomScreen.Alerts,
     Screen.BottomScreen.Profile
-)
-
-
-val screensWithTopBar = screensWithBottom + Screen.PersonProfile
-
-val allScreens = listOf(
-
-    Screen.Login,
-    Screen.BottomScreen.Stories,
-    // Screen.BottomScreen.Chats,
-    Screen.BottomScreen.Alerts,
-    Screen.BottomScreen.Find,
-    Screen.BottomScreen.Profile,
-
-    Screen.StoriesDetail,
-    Screen.PersonProfile
 )
