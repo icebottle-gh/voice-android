@@ -16,6 +16,7 @@ import androidx.navigation.navArgument
 import org.noormahal.vp25.android.components.VpTopAppBarAction
 import org.noormahal.vp25.android.presentation.ui.FindScreen
 import org.noormahal.vp25.android.presentation.ui.HomeShellScaffold
+import org.noormahal.vp25.android.presentation.ui.NewStoryView
 import org.noormahal.vp25.android.presentation.ui.OwnProfileScreen
 import org.noormahal.vp25.android.presentation.ui.PersonProfileScreen
 import org.noormahal.vp25.android.presentation.ui.StoriesDetail
@@ -68,6 +69,12 @@ fun HomeNavGraph(
         ){
             val userId = it.arguments?.getString("userId")?:""
             StoriesDetail(userId,storiesViewModel, navController)
+        }
+
+        // Also escapes the shell chrome - owns its own Scaffold/top bar per step, same
+        // as StoriesDetail above.
+        composable(Screen.NewStory.route) {
+            NewStoryView(navController, storiesViewModel)
         }
 
         composable(

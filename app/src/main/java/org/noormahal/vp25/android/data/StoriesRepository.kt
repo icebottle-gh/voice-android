@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.Flow
 // Repository abstracts data sources, making it easy to switch between a database, API, or cache.(Scalability)
 class StoriesRepository(
     private val storiesDao: StoriesDao,
-    private val usersDao: UsersDao
+    private val usersDao: UsersDao,
+    private val draftDao: DraftDao
 ) {
     private fun expiryCutoffMillis() = System.currentTimeMillis() - STORY_LIFETIME_MILLIS
 
@@ -20,13 +21,15 @@ class StoriesRepository(
     suspend fun upsertUsers(users: List<Users>) = usersDao.upsertAll(users)
 
     suspend fun insertStories(stories: List<Stories>) {
-        // Opportunistic cleanup: piggyback on the one place new stories already
-        // arrive, rather than standing up a separate periodic job for this.
         storiesDao.deleteStoriesOlderThan(expiryCutoffMillis())
         storiesDao.insertStories(stories)
     }
 
     suspend fun clearSeededDummyStories() = storiesDao.clearSeededDummyStories()
+
+    suspend fun getDraft(): Draft? = draftDao.getDraft()
+    suspend fun saveDraft(draft: Draft) = draftDao.saveDraft(draft)
+    suspend fun clearDraft() = draftDao.clearDraft()
 
 }
 

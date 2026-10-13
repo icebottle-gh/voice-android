@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.noormahal.vp25.android.common.Client
 import org.noormahal.vp25.android.common.CURRENT_USER_USERNAME
+import org.noormahal.vp25.android.data.Draft
 import org.noormahal.vp25.android.data.Graph
 import org.noormahal.vp25.android.data.StoriesRepository
 import org.noormahal.vp25.android.data.Story
@@ -105,6 +106,29 @@ class StoriesViewModel(
         }
     }
 
+
+    suspend fun postStory(text: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                Client.user!!.stories().send(text)
+                refreshStories()
+                // The draft (if any) is now posted - don't leave it around to resurface
+                // the next time the compose screen opens.
+                storiesRepository.clearDraft()
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Client.reportIfUnauthorized(e)
+                false
+            }
+        }
+    }
+
+    suspend fun getDraft(): Draft? = withContext(Dispatchers.IO) { storiesRepository.getDraft() }
+
+    suspend fun saveDraft(draft: Draft) = withContext(Dispatchers.IO) { storiesRepository.saveDraft(draft) }
+
+    suspend fun clearDraft() = withContext(Dispatchers.IO) { storiesRepository.clearDraft() }
 
     fun markStoryAsViewed(story: Story, reportToBackend: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {

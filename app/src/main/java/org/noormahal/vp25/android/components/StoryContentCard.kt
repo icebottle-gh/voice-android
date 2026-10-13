@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.noormahal.vp25.android.common.parseStoryMarkup
 import org.noormahal.vp25.android.theme.StoryContentTextStyle
 import org.noormahal.vp25.android.theme.VpTheme
 
@@ -27,7 +28,7 @@ fun StoryContentCard(storyDetails: String, modifier: Modifier = Modifier) {
     ) {
         Text(
             modifier = Modifier.padding(vertical = 24.dp, horizontal = 8.dp),
-            text = storyDetails,
+            text = parseStoryMarkup(storyDetails),
             style = StoryContentTextStyle,
             textAlign = TextAlign.Left
         )
@@ -67,6 +68,50 @@ fun StoryContentCardPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             StoryContentCard(
                 storyDetails = "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+            )
+        }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun StoryContentCardEscapedLiteralPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            // annotatedStringToMarkup() escapes literal markup characters in the
+            // underlying text, so a sent story with no formatting applied would have
+            // produced this exact escaped string for "Rated **** out of 5 stars".
+            StoryContentCard(
+                storyDetails = "Rated \\*\\*\\*\\* out of 5 stars"
+            )
+        }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun StoryContentCardMultilineFormattedPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            // A bold span that itself spans a line break - makes sure a style run
+            // doesn't get cut off by the newline in between its open/close markers.
+            StoryContentCard(
+                storyDetails = "**Day one:\nmade it to base camp.**\n\nDay two is *when it got hard*."
+            )
+        }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun StoryContentCardFormattedPreview() {
+    VpTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            StoryContentCard(
+                storyDetails = "Just got back from the **best hike** of my life. The view was *unreal* - ~~almost~~ turned back halfway."
             )
         }
     }

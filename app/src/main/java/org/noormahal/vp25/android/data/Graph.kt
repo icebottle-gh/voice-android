@@ -7,7 +7,7 @@ object Graph {
     lateinit var database: VakkiDatabase
 
     val storiesRepository by lazy {
-        StoriesRepository(storiesDao = database.StoriesDao(), usersDao = database.UsersDao())
+        StoriesRepository(storiesDao = database.StoriesDao(), usersDao = database.UsersDao(), draftDao = database.DraftDao())
     }
     fun provide(context:Context){
         database = Room.databaseBuilder(

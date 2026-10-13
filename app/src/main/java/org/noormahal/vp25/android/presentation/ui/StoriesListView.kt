@@ -59,7 +59,7 @@ fun StoriesListScreen(
             VpFab(
                 icon = ImageVector.vectorResource(id = R.drawable.baseline_create_24),
                 contentDescription = "New Story",
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(Screen.NewStory.route) },
                 style = FabStyle.SQUIRCLE_PRIMARY
             )
         }
@@ -126,8 +126,9 @@ fun StoriesListView(navController: NavHostController, storiesViewModel: StoriesV
             onMyStoryClick = {
                 if (myStory != null) {
                     navController.navigate(Screen.StoriesDetail.createRoute(CURRENT_USER_USERNAME))
+                } else {
+                    navController.navigate(Screen.NewStory.route)
                 }
-                // TODO: navigate to the new-story creation screen once it exists
             },
             onUserClick = { user -> navController.navigate(Screen.StoriesDetail.createRoute(user.userName)) }
         )
